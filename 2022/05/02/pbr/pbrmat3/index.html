@@ -30,8 +30,10 @@
 <meta property="og:image" content="https://beizi-blog.cn/images/pbr/reflect_type.jpg">
 <meta property="og:image" content="https://beizi-blog.cn/images/pbr/microfacet.jpg">
 <meta property="og:image" content="https://beizi-blog.cn/images/pbr/refraction_index.jpg">
+<meta property="og:image" content="https://beizi-blog.cn/images/pbr/non_metal.jpg">
+<meta property="og:image" content="https://beizi-blog.cn/images/pbr/metal.jpg">
 <meta property="article:published_time" content="2022-05-02T14:48:18.000Z">
-<meta property="article:modified_time" content="2022-05-04T07:48:36.527Z">
+<meta property="article:modified_time" content="2022-05-04T09:28:01.110Z">
 <meta property="article:author" content="被子">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://beizi-blog.cn/images/pbr/reflect_type.jpg">
@@ -225,7 +227,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-05-04 15:48:36" itemprop="dateModified" datetime="2022-05-04T15:48:36+08:00">2022-05-04</time>
+      <time title="修改时间：2022-05-04 17:28:01" itemprop="dateModified" datetime="2022-05-04T17:28:01+08:00">2022-05-04</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -343,10 +345,16 @@ R(\omega_i) &amp;= \int_{\mathcal{H}^2(n)}f_r(p,\omega_i)|cos\theta_i|d\omega_i 
 <li>
 <p>电介质</p>
 <p>也叫做绝缘体，不导电，具有实数值的折射率（一般在 1 -  3 之间），会透射一部分的入射光，常见的有玻璃、水、空气</p>
+<br/>
+<p><img src="/images/pbr/non_metal.jpg" alt=""></p>
+<br/>
 </li>
 <li>
 <p>导体</p>
 <p>导电，具有复数值的折射率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>η</mi><mo stretchy="true">‾</mo></mover><mo>=</mo><mi>η</mi><mo>+</mo><mi>i</mi><mi>k</mi></mrow><annotation encoding="application/x-tex">\overline{\eta} = \eta + ik</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.825em;vertical-align:-0.19444em;"></span><span class="mord overline"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.63056em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span><span style="top:-3.55056em;"><span class="pstrut" style="height:3em;"></span><span class="overline-line" style="border-bottom-width:0.04em;"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.7777700000000001em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span>，内部的自由电子会吸收透射的能量，呈现不透明的材质，如金属</p>
+<br/>
+<p><img src="/images/pbr/metal.jpg" alt=""></p>
+<br/>
 </li>
 <li>
 <p>半导体</p>
