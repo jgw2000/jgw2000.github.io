@@ -134,13 +134,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -183,7 +183,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/06/28/rtr/transform/">
+    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/07/18/dx12/guide3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -201,7 +201,597 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/06/28/rtr/transform/" class="post-title-link" itemprop="url">实时渲染 - 4. 变换 Part 1</a>
+          <a href="/2022/07/18/dx12/guide3/" class="post-title-link" itemprop="url">Direct3D 12 - 资源绑定 Part 2</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-07-18 03:02:17 / 修改时间：09:53:04" itemprop="dateCreated datePublished" datetime="2022-07-18T03:02:17+08:00">2022-07-18</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/direct3d12/resource-binding">Resource Binding in Direct3D 12</a></p>
+<h1 id="descriptors"><a class="markdownIt-Anchor" href="#descriptors"></a> Descriptors</h1>
+<h2 id="descriptor-数据"><a class="markdownIt-Anchor" href="#descriptor-数据"></a> Descriptor 数据</h2>
+<blockquote>
+<p>一个 descriptor 是一小块数据，以 GPU 特定的不透明格式完全描述了一个资源对象；依赖于 GPU 硬件，descriptors 大小会变化，可以通过调用 ID3D12Device::GetDescriptorHandleIncrementSize 查询 SRV，UAV，或者 CBV 的大小。</p>
+<p><img src="/images/dx12/descriptors.jpg" alt="" /></p>
+<p>驱动程序不会跟踪或者持有 descriptors 的引用，而是由应用程序来确保使用正确的 descriptor 类型以及当前的信息。有一个例外，驱动程序会检查 render target 绑定以确保 swap chains 正确运行。</p>
+<p>对象 descriptors 不需要被释放，在其创建时驱动程序不会附加任何额外的分配。然而，一个 descriptor 可能会包含其他分配的引用。例如，一个 SRV descriptor 一定包含 D3D 资源的虚拟地址；应用程序必须确保不会使用一个 SRV descriptor，当其依赖的 D3D 资源已经被销毁或者正在被修改 (例如被声明为 nonresident)。</p>
+</blockquote>
+<h2 id="descriptor-handles"><a class="markdownIt-Anchor" href="#descriptor-handles"></a> Descriptor handles</h2>
+<blockquote>
+<p>一个 descriptor handle 表示该 descriptor 的唯一地址，它和指针相似，但实现是硬件特定不透明的。</p>
+<p>CPU handles 是用于即时使用，例如复制，在使用之后 (例如调用 ID3D12GraphicsCommandList::OMSetRenderTargets)，可以立即被复用或者下面的 heap 可以被销毁。</p>
+<p>GPU handles 不是用于即时使用 - 他们在一个命令列表中识别位置，在 GPU 执行时使用；GPU handles 必须一直保留到任何引用他们的命令列表都执行完毕。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;<span class="comment">// 在一个 heap 的起始位置创建 descriptor handle </span></span><br><span class="line">&gt;ID3D12DescriptorHeap::GetCPUDescriptorHandleForHeapStart</span><br><span class="line">&gt;ID3D12DescriptorHeap::GetGPUDescriptorHandleForHeapStart</span><br><span class="line">   </span><br><span class="line">&gt;<span class="comment">// 获取在一个 heap 中每个 descriptor 之间的间隔大小</span></span><br><span class="line">&gt;ID3D12Device::GetDescriptorHandleIncrementSize</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h2 id="null-descriptors"><a class="markdownIt-Anchor" href="#null-descriptors"></a> Null descriptors</h2>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/07/17/dx12/guide2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="被子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="被子的博客">
+      <meta itemprop="description" content="描述">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 被子的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/07/17/dx12/guide2/" class="post-title-link" itemprop="url">Direct3D 12 - 资源绑定 Part 1</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-07-17 23:39:51" itemprop="dateCreated datePublished" datetime="2022-07-17T23:39:51+08:00">2022-07-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-07-18 03:00:42" itemprop="dateModified" datetime="2022-07-18T03:00:42+08:00">2022-07-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Direct3D-12/" itemprop="url" rel="index"><span itemprop="name">Direct3D 12</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/direct3d12/resource-binding">Resource Binding in Direct3D 12</a></p>
+<h1 id="资源绑定概述"><a class="markdownIt-Anchor" href="#资源绑定概述"></a> 资源绑定概述</h1>
+<h2 id="资源和-graphics-pipeline"><a class="markdownIt-Anchor" href="#资源和-graphics-pipeline"></a> 资源和 graphics pipeline</h2>
+<blockquote>
+<p>Shader 资源（例如纹理，常量表，图像，buffers等）并不是直接绑定到 shader pipeline，而是通过 <strong>descriptor</strong> 来访问；一个 descriptor 是很小的对象包含了关于一个资源的信息。</p>
+<p>Descriptors 组合在一起形成 <strong>descriptor tables</strong>，每一个 descriptor table 储存一组类型范围内的资源信息。有许多不同类型的资源，最常见的有：</p>
+<ul>
+<li>Constant buffer views (CBVs)</li>
+<li>Unordered access views (UAVs)</li>
+<li>Shader resource views (SRVs)</li>
+<li>Samplers</li>
+</ul>
+<p>其中 SRV，UAV，和 CBV descriptors 可以被组合进同一个 descriptor table。</p>
+<p>Descriptor tables 储存在 <strong>descriptor heap</strong> 中，理想情况下，descriptor heaps 包含所有在接下去几帧内渲染所需要的 descriptors (在 descriptor tables 中)；所有资源储存在用户态的 heaps 中。</p>
+<p>另一个概念是 <strong>root signature</strong>，这是一个应用定义的绑定协定，被 shader 用于定位所需要访问的资源，root signature 可以储存：</p>
+<ul>
+<li>descriptor heap 中 descriptor tables 的索引</li>
+<li>常量</li>
+<li>少量 descriptors</li>
+</ul>
+<p>换句话说，root signature 提供了性能优化，适用于在每一次绘制中都会改变的少量数据。</p>
+</blockquote>
+<h2 id="资源类型和-views"><a class="markdownIt-Anchor" href="#资源类型和-views"></a> 资源类型和 views</h2>
+<p><strong>资源类型</strong></p>
+<ul>
+<li>Texture1D 和 Texture1DArray</li>
+<li>Texture2D 和 Texture2DArray，Texture2DMS，Texture2DMSArray</li>
+<li>Texture3D</li>
+<li>Buffers (typed，structured and raw)</li>
+</ul>
+<p><strong>资源 views</strong></p>
+<ul>
+<li>Constant buffer view (CBV)</li>
+<li>Unordered access view (UAV)</li>
+<li>Shader resource view (SRV)</li>
+<li>Samplers</li>
+<li>Render Target View (RTV)</li>
+<li>Depth Stencil View (DSV)</li>
+<li>Index Buffer View (IBV)</li>
+<li>Vertex Buffer View (VBV)</li>
+<li>Stream Output View (SOV)</li>
+</ul>
+<p>其中只有前 4 种 views 对 shaders 可见。</p>
+<h2 id="资源绑定的一般流程"><a class="markdownIt-Anchor" href="#资源绑定的一般流程"></a> 资源绑定的一般流程</h2>
+<ul>
+<li>创建一个或多个 root signature 对象 - 每一个对应不同的绑定配置需求</li>
+<li>创建 shaders 和 pipeline state (使用所需的 root signature 对象)</li>
+<li>创建一个或多个 descriptor heaps，包含每一帧渲染所需要的所有 SRV，UAV 和 CBV descriptors</li>
+<li>初始化 descriptor heap(s)</li>
+<li>对于将要渲染的每一帧
+<ul>
+<li>对于每一个命令列表
+<ul>
+<li>设置 root signature</li>
+<li>更新 root signature 中的常量以及/或者 descriptors (例如世界/视图投影矩阵)</li>
+<li>对于每一个将要绘制的 item
+<ul>
+<li>定义任何新的每一个对象渲染所需要的 descriptors</li>
+<li>更新 root signature 指向 descriptor heaps 中所需要的区域</li>
+<li>更新 root signature 中的常量以及/或者 descriptors 用于每一个 item 的渲染</li>
+<li>设置 pipeline state (只有在需要改变时)</li>
+<li>绘制</li>
+</ul>
+</li>
+<li>重复 (下一个 item)</li>
+</ul>
+</li>
+<li>重复 (下一个命令列表)</li>
+</ul>
+</li>
+<li>重复 (下一帧)</li>
+</ul>
+<h2 id="suballocation"><a class="markdownIt-Anchor" href="#suballocation"></a> Suballocation</h2>
+<blockquote>
+<p>在 Direct3D 12，app 拥有对于内存管理底层的控制；app 可以使用 API 分配一大块内存，之后可以创建 descriptors 指向这一大块内存中的某一个区域，这一过程称为 <strong>suballocation</strong>。这可以使得 app 更有效率地使用计算和内存，例如，app 可以使用 fences 来决定什么时候一个特定的资源正在被使用或没有被使用。</p>
+</blockquote>
+<h2 id="释放资源"><a class="markdownIt-Anchor" href="#释放资源"></a> 释放资源</h2>
+<blockquote>
+<p>在任何被绑定到 pipeline 上的资源被释放之前，GPU 必须完成对该内存的操作。</p>
+<p>最粗糙的方式是等待这一振的渲染完成，从而确定 GPU 已经完成了，更好的方式是使用 fences 来确定 GPU 已经完成。</p>
+</blockquote>
+<h1 id="和-direct3d-11-绑定模型的区别"><a class="markdownIt-Anchor" href="#和-direct3d-11-绑定模型的区别"></a> 和 Direct3D 11 绑定模型的区别</h1>
+<h2 id="内存驻留管理和绑定分离"><a class="markdownIt-Anchor" href="#内存驻留管理和绑定分离"></a> 内存驻留管理和绑定分离</h2>
+<blockquote>
+<p>应用可以显式地控制哪些 surfaces 需要在 GPU 中可以获得并直接使用 (称作 “resident”)，相反地，他们也可以对资源应用其他状态，例如显式地使他们 not resident；重要的一点在于，应用对于资源内存驻留的管理和资源绑定是完全解耦的。</p>
+<p>这种解耦降低了系统/硬件在渲染上的成本，因为 OS 不需要频繁地检查局部的绑定状态来确定需要驻留哪些资源。进一步的，shaders 也不再需要知道他们需要引用的具体 surfaces，只要整个可访问的资源集合提前被驻留即可。</p>
+</blockquote>
+<h2 id="对象生命管理和绑定分离"><a class="markdownIt-Anchor" href="#对象生命管理和绑定分离"></a> 对象生命管理和绑定分离</h2>
+<blockquote>
+<p>和之前的 API 不同，系统不再跟踪资源的绑定；在释放任何资源之前，例如纹理，应用程序必须确保 GPU 已经完成对该资源的引用，这意味着，GPU 必须已经完成了引用该资源的命令列表的执行。</p>
+</blockquote>
+<h2 id="驱动程序资源状态跟踪和绑定分离"><a class="markdownIt-Anchor" href="#驱动程序资源状态跟踪和绑定分离"></a> 驱动程序资源状态跟踪和绑定分离</h2>
+<blockquote>
+<p>系统不再检查资源绑定来理解什么时候资源状态切换发生了，一个常见的例子是 GPU 和 驱动程序需要知道什么时候一个 surface 从 RTV 切换到 SRV。现在，应用程序必须通过 API 来识别什么时候系统可能关心的任何资源状态的切换正在发生。</p>
+</blockquote>
+<h2 id="cpu-gpu-映射的内存同步和绑定分离"><a class="markdownIt-Anchor" href="#cpu-gpu-映射的内存同步和绑定分离"></a> CPU GPU 映射的内存同步和绑定分离</h2>
+<blockquote>
+<p>系统不再检查资源绑定来理解渲染是否需要被延迟 (因为该渲染依赖于一个资源，其已经被 mapped 用于 CPU 访问但是还没有被 unmapped)；现在，应用程序需要承担起同步 CPU 和 GPU 内存访问的责任，系统提供了机制请求一个 CPU 线程进入睡眠直到工作完成；也可是使用轮询，但是更低效。</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/07/17/dx12/guide1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="被子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="被子的博客">
+      <meta itemprop="description" content="描述">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 被子的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/07/17/dx12/guide1/" class="post-title-link" itemprop="url">Direct3D 12 - 工作提交 Part 1</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-07-17 12:56:07" itemprop="dateCreated datePublished" datetime="2022-07-17T12:56:07+08:00">2022-07-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-07-18 00:09:36" itemprop="dateModified" datetime="2022-07-18T00:09:36+08:00">2022-07-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Direct3D-12/" itemprop="url" rel="index"><span itemprop="name">Direct3D 12</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/direct3d12/command-queues-and-command-lists">Work submission in Direct3D 12</a></p>
+<h1 id="设计哲学-命令队列和命令列表"><a class="markdownIt-Anchor" href="#设计哲学-命令队列和命令列表"></a> 设计哲学 - 命令队列和命令列表</h1>
+<h2 id="删除-immediate-context"><a class="markdownIt-Anchor" href="#删除-immediate-context"></a> 删除 immediate context</h2>
+<blockquote>
+<p>从 Direct3D 11 到 Direct3D 12 最大的改变就是不再有 immediate context，取而代之的是命令列表，我们可以通过命令列表来调用各种渲染 API，绘制图形或者改变渲染状态等。借助于现代多核处理器的优势，我们可以并发的同时记录多个命令列表。</p>
+<p>命令列表一般只执行一次，然而，如果应用程序如果能确保前一次执行已经完成的话，那么就可以提交新的执行请求，这样该命令列表就可以多次执行。</p>
+</blockquote>
+<h2 id="组合-gpu-工作项目"><a class="markdownIt-Anchor" href="#组合-gpu-工作项目"></a> 组合 GPU 工作项目</h2>
+<blockquote>
+<p>借助于现今硬件功能的优势，Direct3D 12 增加了第 2 层命令列表，称为 bundles，其目的在于允许 app 把一小部分 API 命令组合在一起，以便于后续在命令列表中重复执行；在创建 bundle 的时候，驱动程序会尽可能的执行预处理从而使得之后的执行更有效率。</p>
+</blockquote>
+<h2 id="gpu-工作提交"><a class="markdownIt-Anchor" href="#gpu-工作提交"></a> GPU 工作提交</h2>
+<blockquote>
+<p>App 现在必须显式地提交命令列表到一个和 Direct3D 设备相关联的命令队列，bundles 不能直接提交到命令队列；任何线程在任何时候都可以提交一个命令列表到任何命令队列，运行时会自动管理保持提交顺序。</p>
+</blockquote>
+<h1 id="创建和记录命令列表和-bundles"><a class="markdownIt-Anchor" href="#创建和记录命令列表和-bundles"></a> 创建和记录命令列表和 bundles</h1>
+<p><img src="/images/dx12/command_list_bundle.jpg" alt="" /></p>
+<h2 id="创建命令列表"><a class="markdownIt-Anchor" href="#创建命令列表"></a> 创建命令列表</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">HRESULT <span class="title">ID3D12Device::CreateCommandList</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           UINT                    nodeMask,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           D3D12_COMMAND_LIST_TYPE type,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           ID3D12CommandAllocator  *pCommandAllocator,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] ID3D12PipelineState     *pInitialState,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           REFIID                  riid,</span></span></span><br><span class="line"><span class="function"><span class="params">  [out]          <span class="keyword">void</span>                    **ppCommandList</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function">HRESULT <span class="title">ID3D12Device::CreateCommandAllocator</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]  D3D12_COMMAND_LIST_TYPE type,</span></span></span><br><span class="line"><span class="function"><span class="params">        REFIID                  riid,</span></span></span><br><span class="line"><span class="function"><span class="params">  [out] <span class="keyword">void</span>                    **ppCommandAllocator</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><strong>ID3D12CommandAllocator</strong></p>
+<blockquote>
+<p>允许 app 管理分配给命令队列的内存，一个 allocator 可以被用来创建任何数量的 GraphicsCommandList 对象，但是在任一时刻只能关联最多一个当前正在记录的命令队列。</p>
+<p>调用 ID3D12CommandAllocator::Reset 回收分配的内存，但在回收之前，app 必须确保 GPU 不再执行任何相关联的命令列表。</p>
+</blockquote>
+<p><strong>ID3D12PipelineState</strong></p>
+<blockquote>
+<p>为命令队列指定初始的 pipeline state，app 通常在初始化时候会创建很多 ID3D12PipelineState 对象，之后通过调用 ID3D12GraphicsCommandList::SetPipelineState 切换当前绑定的状态对象。</p>
+<p>注意：bundles 不会继承其所在的命令列表中设置的 pipeline state ！</p>
+</blockquote>
+<h2 id="记录命令列表"><a class="markdownIt-Anchor" href="#记录命令列表"></a> 记录命令列表</h2>
+<blockquote>
+<p>命令列表创建或者调用 ID3D12GraphicsCommandList::Reset 之后即进入记录状态，命令列表在执行过程中也可以调用 Reset，一个典型用法是在提交之后立马 Reset 来复用分配给其他命令队列的内存。</p>
+<p>调用 Close 退出记录状态。</p>
+<p>一个简单的 allocator 池化策略大约需要 numCommandLists * MaxFrameLatency 个 allocators；一个更高级的池化策略是在同一个线程里复用 allocators，大约需要 numRecordingThreads * MaxFrameLatency 个 allocators。</p>
+<p>使用 fence 来决定什么时候一个给定的 allocator 可以被复用。</p>
+<p>由于命令列表在提交之后可以立马 Reset，因此在调用 ID3D12CommandQueue::ExecuteCommandLists 之后可以直接放回 pool 中。</p>
+</blockquote>
+<h1 id="执行和同步命令列表"><a class="markdownIt-Anchor" href="#执行和同步命令列表"></a> 执行和同步命令列表</h1>
+<h2 id="命令队列"><a class="markdownIt-Anchor" href="#命令队列"></a> 命令队列</h2>
+<blockquote>
+<p>Direct3D 12 命令队列代替了 immediate 模式的运行时和驱动程序同步，使用 API 显式地管理并发、并行和同步，给开发者提供了以下一些改进：</p>
+<ul>
+<li>允许开发者避免由于不必要的同步导致的低效</li>
+<li>允许开发者在更高的层次、更有效率、更准确地使用同步</li>
+<li>显式地标明昂贵的操作</li>
+</ul>
+</blockquote>
+<h2 id="初始化命令队列"><a class="markdownIt-Anchor" href="#初始化命令队列"></a> 初始化命令队列</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">HRESULT <span class="title">ID3D12Device::CreateCommandQueue</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  <span class="keyword">const</span> D3D12_COMMAND_QUEUE_DESC *pDesc,</span></span></span><br><span class="line"><span class="function"><span class="params">  REFIID                         riid,</span></span></span><br><span class="line"><span class="function"><span class="params">  <span class="keyword">void</span>                           **ppCommandQueue</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_COMMAND_QUEUE_DESC</span> &#123;</span></span><br><span class="line">  D3D12_COMMAND_LIST_TYPE   Type;</span><br><span class="line">  INT                       Priority;</span><br><span class="line">  D3D12_COMMAND_QUEUE_FLAGS Flags;</span><br><span class="line">  UINT                      NodeMask;</span><br><span class="line">&#125; D3D12_COMMAND_QUEUE_DESC;</span><br></pre></td></tr></table></figure>
+<h2 id="执行命令列表"><a class="markdownIt-Anchor" href="#执行命令列表"></a> 执行命令列表</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12CommandQueue::ExecuteCommandLists</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in] UINT              NumCommandLists,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in] ID3D12CommandList * <span class="keyword">const</span> *ppCommandLists</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="从多个命令队列访问资源"><a class="markdownIt-Anchor" href="#从多个命令队列访问资源"></a> 从多个命令队列访问资源</h2>
+<blockquote>
+<p>运行时附加以下这些规则来限制资源的访问：</p>
+<ol>
+<li>一个资源不能同时被多个命令队列写入，当一个资源在一个队列中切换到可写状态之后，可以认为被该队列独占拥有，只有在切换到 READ 或者 COMMON 状态之后才能被其他队列访问</li>
+<li>当一个资源在 READ 状态，可以同时被多个队列读取</li>
+</ol>
+</blockquote>
+<h2 id="使用-fences-同步命令列表执行"><a class="markdownIt-Anchor" href="#使用-fences-同步命令列表执行"></a> 使用 Fences 同步命令列表执行</h2>
+<blockquote>
+<p>当一个队列中的命令列表依赖另一个队列正在操作的资源时，app 需要显式地管理这两个队列之间的同步。Direct3D12 使用 Fences 概念来完成队列之间的同步，在 API 中由 ID3D12Fence 接口表示。</p>
+<p><strong>创建 Fence</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">HRESULT <span class="title">ID3D12Device::CreateFence</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">        UINT64            InitialValue,</span></span></span><br><span class="line"><span class="function"><span class="params">        D3D12_FENCE_FLAGS Flags,</span></span></span><br><span class="line"><span class="function"><span class="params">        REFIID            riid,</span></span></span><br><span class="line"><span class="function"><span class="params">  [out] <span class="keyword">void</span>              **ppFence</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><strong>在 GPU 更新 Fence</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">HRESULT <span class="title">ID3D12CommandQueue::Signal</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  ID3D12Fence *pFence,</span></span></span><br><span class="line"><span class="function"><span class="params">  UINT64      Value</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><strong>在 CPU 更新 Fence</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">HRESULT <span class="title">ID3D12Fence::Signal</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  UINT64 Value</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><strong>示例</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Wait for the command list to execute; we are reusing the same command </span></span><br><span class="line"><span class="comment">// list in our main loop but for now, we just want to wait for setup to </span></span><br><span class="line"><span class="comment">// complete before continuing.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Signal and increment the fence value.</span></span><br><span class="line"><span class="keyword">const</span> UINT64 fenceToWaitFor = m_fenceValue;</span><br><span class="line"><span class="built_in">ThrowIfFailed</span>(m_commandQueue-&gt;<span class="built_in">Signal</span>(m_fence.<span class="built_in">Get</span>(), fenceToWaitFor));</span><br><span class="line">m_fenceValue++;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Wait until the fence is completed.</span></span><br><span class="line"><span class="built_in">ThrowIfFailed</span>(m_fence-&gt;<span class="built_in">SetEventOnCompletion</span>(fenceToWaitFor, m_fenceEvent));</span><br><span class="line"><span class="built_in">WaitForSingleObject</span>(m_fenceEvent, INFINITE);</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h1 id="管理-graphics-pipeline-state"><a class="markdownIt-Anchor" href="#管理-graphics-pipeline-state"></a> 管理 Graphics Pipeline State</h1>
+<h2 id="概述"><a class="markdownIt-Anchor" href="#概述"></a> 概述</h2>
+<blockquote>
+<p>当几何被提交到 GPU 绘制时，有一些硬件设置决定如何解释和渲染这些输入数据，这些设置称为 graphics pipeline state，常用的设置包括：</p>
+<ul>
+<li>光栅化状态</li>
+<li>混合状态</li>
+<li>深度模板状态</li>
+<li>几何拓扑类型</li>
+<li>shaders</li>
+</ul>
+<p>在 Direct3D 12 中大多数 graphics pipeline state 通过 pipeline state objects (PSO) 来设置，app 一般在初始化的时候创建任意多的这些对象 (由 ID3D12PipelineState 接口表示)。之后在渲染的时候，命令队列可以通过调用 ID3D12GraphicsCommandList::SetPipelineState 快速地切换不同的 pipeline state。</p>
+<p>在现今的 GPU 硬件中，不同的单元之间会有依赖关系，例如，混合状态单元会依赖光栅化状态单元；因此，Direct3D 12 在设计上允许 GPU 在每一个 pipeline state 中预处理所有这些有依赖关系的设置，通常在初始化的时候，从而使得在渲染时尽可能有效率地在不同状态之间进行切换。</p>
+</blockquote>
+<h2 id="使用-pso-设置-graphics-pipeline-state"><a class="markdownIt-Anchor" href="#使用-pso-设置-graphics-pipeline-state"></a> 使用 PSO 设置 Graphics Pipeline State</h2>
+<p><strong>创建 PSO</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">HRESULT <span class="title">ID3D12Device::CreateGraphicsPipelineState</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]  <span class="keyword">const</span> D3D12_GRAPHICS_PIPELINE_STATE_DESC *pDesc,</span></span></span><br><span class="line"><span class="function"><span class="params">        REFIID                                   riid,</span></span></span><br><span class="line"><span class="function"><span class="params">  [out] <span class="keyword">void</span>                                     **ppPipelineState</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_GRAPHICS_PIPELINE_STATE_DESC</span> &#123;</span></span><br><span class="line">  ID3D12RootSignature                *pRootSignature;</span><br><span class="line">  D3D12_SHADER_BYTECODE              VS;</span><br><span class="line">  D3D12_SHADER_BYTECODE              PS;</span><br><span class="line">  D3D12_SHADER_BYTECODE              DS;</span><br><span class="line">  D3D12_SHADER_BYTECODE              HS;</span><br><span class="line">  D3D12_SHADER_BYTECODE              GS;</span><br><span class="line">  D3D12_STREAM_OUTPUT_DESC           StreamOutput;</span><br><span class="line">  D3D12_BLEND_DESC                   BlendState;</span><br><span class="line">  UINT                               SampleMask;</span><br><span class="line">  D3D12_RASTERIZER_DESC              RasterizerState;</span><br><span class="line">  D3D12_DEPTH_STENCIL_DESC           DepthStencilState;</span><br><span class="line">  D3D12_INPUT_LAYOUT_DESC            InputLayout;</span><br><span class="line">  D3D12_INDEX_BUFFER_STRIP_CUT_VALUE IBStripCutValue;</span><br><span class="line">  D3D12_PRIMITIVE_TOPOLOGY_TYPE      PrimitiveTopologyType;</span><br><span class="line">  UINT                               NumRenderTargets;</span><br><span class="line">  DXGI_FORMAT                        RTVFormats[<span class="number">8</span>];</span><br><span class="line">  DXGI_FORMAT                        DSVFormat;</span><br><span class="line">  DXGI_SAMPLE_DESC                   SampleDesc;</span><br><span class="line">  UINT                               NodeMask;</span><br><span class="line">  D3D12_CACHED_PIPELINE_STATE        CachedPSO;</span><br><span class="line">  D3D12_PIPELINE_STATE_FLAGS         Flags;</span><br><span class="line">&#125; D3D12_GRAPHICS_PIPELINE_STATE_DESC;</span><br></pre></td></tr></table></figure>
+<h2 id="不使用-pso-设置-graphics-pipeline-state"><a class="markdownIt-Anchor" href="#不使用-pso-设置-graphics-pipeline-state"></a> 不使用 PSO 设置 Graphics Pipeline State</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">状态</th>
+<th>ID3D12GraphicsCommandList 接口方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">资源绑定</td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-iasetindexbuffer">IASetIndexBuffer</a></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-iasetvertexbuffers">IASetVertexBuffers</a></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-sosettargets">SOSetTargets</a></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-omsetrendertargets">OMSetRenderTargets</a></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-setdescriptorheaps">SetDescriptorHeaps</a></td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td>所有 SetGraphicsRoot… 方法</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td>所有 SetComputeRoot… 方法</td>
+</tr>
+<tr>
+<td style="text-align:left">视口</td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-rssetviewports">RSSetViewports</a></td>
+</tr>
+<tr>
+<td style="text-align:left">裁剪</td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-rssetscissorrects">RSSetScissorRects</a></td>
+</tr>
+<tr>
+<td style="text-align:left">混合因子</td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-omsetblendfactor">OMSetBlendFactor</a></td>
+</tr>
+<tr>
+<td style="text-align:left">深度模板引用值</td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-omsetstencilref">OMSetStencilRef</a></td>
+</tr>
+<tr>
+<td style="text-align:left">Input-assembler 集合拓扑顺序和邻接类型</td>
+<td><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-iasetprimitivetopology">IASetPrimitiveTopology</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="graphics-pipeline-state-继承"><a class="markdownIt-Anchor" href="#graphics-pipeline-state-继承"></a> Graphics Pipeline State 继承</h2>
+<blockquote>
+<p>对于使用 PSO 设置的 Graphics Pipeline States ，其中的任何状态都不会被命令列表或者 bundles 继承。命令列表和 bundles 在创建的时候通过调用 ID3D12Device::CreateCommandList 来设置初始状态，如果没有指定 PSO，那么就会使用默认的初始状态；可以通过调用 ID3D12GraphicsCommandList::SetPipelineState 改变当前 PSO。</p>
+<p>命令列表也不会继承通过 ID3D12GraphicsCommandList 接口方法设置的状态，例如 RSSetViewports。</p>
+<p>Bundles 继承所有不使用 PSO 设置的状态，除了几何拓扑类型，当一个 bundle 开始执行时，集合拓扑类型总是被设置为 D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED。在 bundle 里设置的任何状态 (PSO，非 PSO 状态以及资源绑定)都会影响其所在的命令列表的状态。</p>
+<p>在命令列表或者 bundles 中设置的资源绑定状态会继承。</p>
+</blockquote>
+<h1 id="pipeline-和-shaders"><a class="markdownIt-Anchor" href="#pipeline-和-shaders"></a> Pipeline 和 Shaders</h1>
+<p><strong>Graphics Pipeline</strong></p>
+<p><img src="/images/dx12/graphics_pipeline.jpg" alt="" /></p>
+<p><strong>Compute pipeline</strong></p>
+<p><img src="/images/dx12/compute_pipeline.jpg" alt="" /></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/07/11/rtr/transform2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="被子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="被子的博客">
+      <meta itemprop="description" content="描述">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 被子的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/07/11/rtr/transform2/" class="post-title-link" itemprop="url">实时渲染 - 4. 变换 Part 2</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-07-11 01:28:01 / 修改时间：01:29:49" itemprop="dateCreated datePublished" datetime="2022-07-11T01:28:01+08:00">2022-07-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Real-Time-Rendering/" itemprop="url" rel="index"><span itemprop="name">Real Time Rendering</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/06/28/rtr/transform1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="被子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="被子的博客">
+      <meta itemprop="description" content="描述">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 被子的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/06/28/rtr/transform1/" class="post-title-link" itemprop="url">实时渲染 - 4. 变换 Part 1</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1714,284 +2304,9 @@ E_2 &amp;= \frac{\Phi}{A_2} = \frac{\Phi}{A/cos\theta} = \frac{\Phi cos\theta}{A
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2021/07/04/algorithm/graph/shortest_path/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="被子">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="被子的博客">
-      <meta itemprop="description" content="描述">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 被子的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/07/04/algorithm/graph/shortest_path/" class="post-title-link" itemprop="url">最短路问题汇总</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-04 22:06:51" itemprop="dateCreated datePublished" datetime="2021-07-04T22:06:51+08:00">2021-07-04</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-04-23 17:30:02" itemprop="dateModified" datetime="2022-04-23T17:30:02+08:00">2022-04-23</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95/graph/" itemprop="url" rel="index"><span itemprop="name">graph</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="重要性质及松弛技术"><a class="markdownIt-Anchor" href="#重要性质及松弛技术"></a> 重要性质及松弛技术</h1>
-<h2 id="定理1-最优子结构"><a class="markdownIt-Anchor" href="#定理1-最优子结构"></a> 定理1 （最优子结构）</h2>
-<div class="note "><p>给定有向加权图<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>G</mi><mo>=</mo><mo stretchy="false">(</mo><mi>V</mi><mo separator="true">,</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">G = (V, E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault">G</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mclose">)</span></span></span></span>，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi><mo>=</mo><mo>&lt;</mo><msub><mi>v</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>v</mi><mn>2</mn></msub><mo separator="true">,</mo><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mo separator="true">,</mo><msub><mi>v</mi><mi>k</mi></msub><mo>&gt;</mo></mrow><annotation encoding="application/x-tex">P = &lt;v_1, v_2, ... , v_k&gt;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span></span><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.7335400000000001em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">.</span><span class="mord">.</span><span class="mord">.</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span></span></span></span>为从结点 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">v_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 到结点 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">v_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的一条最短路径，对任意 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi><mo separator="true">,</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">i, j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.85396em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">i</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span></span></span></span> 有 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi><mo>≤</mo><mi>j</mi><mo>≤</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">i \le j \le k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.79549em;vertical-align:-0.13597em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.85396em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span></span></span></span>，设 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>P</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mo>&lt;</mo><msub><mi>v</mi><mi>i</mi></msub><mo separator="true">,</mo><msub><mi>v</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo separator="true">,</mo><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mo separator="true">,</mo><msub><mi>v</mi><mi>j</mi></msub><mo>&gt;</mo></mrow><annotation encoding="application/x-tex">P_{ij} = &lt;v_i , v_{i+1} , ... , v_j&gt;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span></span><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8252079999999999em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">.</span><span class="mord">.</span><span class="mord">.</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span></span></span></span> 为从 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 到 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">v_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.716668em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span> 的 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span></span></span></span> 的子路径，则 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>P</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">P_{ij}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span> 是从 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 到 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">v_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.716668em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span> 的一条最短路径。</p>
-</div>
-<h3 id="推论-11"><a class="markdownIt-Anchor" href="#推论-11"></a> 推论 1.1</h3>
-<div class="note "><p>给定有向加权图 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>G</mi><mo>=</mo><mo stretchy="false">(</mo><mi>V</mi><mo separator="true">,</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">G = (V, E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault">G</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mclose">)</span></span></span></span>，源点为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">s</span></span></span></span>，则对于所有边 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mi>u</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo><mo>⊂</mo><mi>E</mi></mrow><annotation encoding="application/x-tex">(u, v) \subset E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⊂</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span></span></span></span>，有 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>δ</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo><mo>≤</mo><mi>δ</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>u</mi><mo stretchy="false">)</mo><mo>+</mo><mi>w</mi><mo stretchy="false">(</mo><mi>u</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\delta(s, v) \le \delta(s, u) + w(u, v)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03785em;">δ</span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03785em;">δ</span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="mopen">(</span><span class="mord mathdefault">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mclose">)</span></span></span></span></p>
-</div>
-<h3 id="松弛技术"><a class="markdownIt-Anchor" href="#松弛技术"></a> 松弛技术</h3>
-<p>对每个结点 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span></span></span></span>，我们设置 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mo stretchy="false">[</mo><mi>v</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">d[v]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">d</span><span class="mopen">[</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mclose">]</span></span></span></span> 来描述从源 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">s</span></span></span></span> 到 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span></span></span></span> 的最短路径的上界，称之为最短路径估计。我们通过下面的过程进行初始化：</p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">INITIALIZE-SINGLE-SOURCE</span><span class="params">(G,S)</span></span></span><br><span class="line"><span class="number">1</span>.  For 每个结点 v</span><br><span class="line"><span class="number">2</span>.    Do d<span class="selector-attr">[v]</span> = 正无穷大</span><br><span class="line"><span class="number">3</span>.       π<span class="selector-attr">[v]</span> = NIL</span><br><span class="line"><span class="number">4</span>.  d<span class="selector-attr">[s]</span> = <span class="number">0</span></span><br></pre></td></tr></table></figure>
-<p>下面的代码实现了对边 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mi>u</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(u, v)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mclose">)</span></span></span></span> 的一次松弛操作：</p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">RELAX</span><span class="params">(u,v,w)</span></span></span><br><span class="line"><span class="number">1</span>.  If d<span class="selector-attr">[v]</span> &gt; d<span class="selector-attr">[u]</span> + w(u, v)</span><br><span class="line"><span class="number">2</span>.     Then d<span class="selector-attr">[v]</span> = d<span class="selector-attr">[u]</span> + w(u, v)</span><br><span class="line"><span class="number">3</span>.          π<span class="selector-attr">[v]</span> = u</span><br></pre></td></tr></table></figure>
-<h1 id="dijkstra"><a class="markdownIt-Anchor" href="#dijkstra"></a> Dijkstra</h1>
-<blockquote>
-<p>给定一个 <code>n</code> 个点 <code>m</code> 条边的有向图，图中可能存在重边和自环，所有边权均为正值。请你求出 <code>1</code> 号点到 <code>n</code> 号点的最短距离，如果无法从 <code>1</code> 号点走到 <code>n</code> 号点，则输出 <code>-1</code>。</p>
-</blockquote>
-<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="constructor">Dijkstra(G,<span class="params">w</span>,<span class="params">s</span>)</span></span><br><span class="line"><span class="number">1.</span>  INITIALIZE-SINGLE-<span class="constructor">SOURCE(G,S)</span></span><br><span class="line"><span class="number">2.</span>  S = ∅</span><br><span class="line"><span class="number">3.</span>  Q = V<span class="literal">[G]</span></span><br><span class="line"><span class="number">4.</span>  While Q ≠ ∅</span><br><span class="line"><span class="number">5.</span>    Do u = <span class="constructor">EXTRACT_MIN(Q)</span></span><br><span class="line"><span class="number">6.</span>       S = S ∪ &#123;u&#125;</span><br><span class="line"><span class="number">7.</span>       For 每个顶点 v ∈ Adj<span class="literal">[<span class="identifier">u</span>]</span></span><br><span class="line"><span class="number">8.</span>          Do <span class="constructor">RELAX(<span class="params">u</span>,<span class="params">v</span>,<span class="params">w</span>)</span></span><br></pre></td></tr></table></figure>
-<p><code>S</code> 表示源点集合，<code>S</code> 中结点的最短路径均已确定，即 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">∀</mi><mi>v</mi><mo>∈</mo><mi>S</mi></mrow><annotation encoding="application/x-tex">\forall v \in S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.73354em;vertical-align:-0.0391em;"></span><span class="mord">∀</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span></span></span></span> 有 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mo stretchy="false">[</mo><mi>v</mi><mo stretchy="false">]</mo><mo>=</mo><mi>δ</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d[v] = \delta(s, v)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">d</span><span class="mopen">[</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03785em;">δ</span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mclose">)</span></span></span></span>，<code>Q</code> 表示优先队列，该队列包含所有属于 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>V</mi><mo>−</mo><mi>S</mi></mrow><annotation encoding="application/x-tex">V - S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span></span></span></span> 的结点。算法反复挑选出最短路径估计最小的结点 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>u</mi><mo>∈</mo><mi>V</mi><mo>−</mo><mi>S</mi></mrow><annotation encoding="application/x-tex">u \in V-S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathdefault">u</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span></span></span></span>，把 <code>u</code> 插入集合 <code>S</code> 中，并对离开 <code>u</code> 的所有边进行松弛操作。</p>
-<p><font color=red>限制条件：所有边的权值非负</font></p>
-<h2 id="定理2"><a class="markdownIt-Anchor" href="#定理2"></a> 定理2</h2>
-<blockquote>
-<p>每当结点 <code>u</code> 插入集合 <code>S</code> 时，有 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mo stretchy="false">[</mo><mi>u</mi><mo stretchy="false">]</mo><mo>=</mo><mi>δ</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>u</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d[u] = \delta(s, u)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">d</span><span class="mopen">[</span><span class="mord mathdefault">u</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03785em;">δ</span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">u</span><span class="mclose">)</span></span></span></span> 成立。</p>
-</blockquote>
-<p>证明： 我们每次选在集合 <code>V-S</code> 中具有最小最短路径估计的结点 <code>u</code> ，因为我们约定所有的边权值非负，所以有可能对结点 <code>u</code> 进行松弛操作的结点必不在集合 <code>V-S</code> 中 （否则与结点 <code>u</code> 的定义矛盾），因此只会在集合 <code>S</code> 中。又由于我们选取结点进入 <code>S</code> 时，<code>S</code> 中的结点已全部进行过松弛操作了，所以 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mo stretchy="false">[</mo><mi>u</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">d[u]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">d</span><span class="mopen">[</span><span class="mord mathdefault">u</span><span class="mclose">]</span></span></span></span> 的值不会再发生改变，因此 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mo stretchy="false">[</mo><mi>u</mi><mo stretchy="false">]</mo><mo>=</mo><mi>δ</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>u</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d[u] = \delta(s,u)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">d</span><span class="mopen">[</span><span class="mord mathdefault">u</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03785em;">δ</span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">u</span><span class="mclose">)</span></span></span></span>。</p>
-<h2 id="代码"><a class="markdownIt-Anchor" href="#代码"></a> 代码</h2>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;queue&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> pair&lt;<span class="keyword">int</span>, <span class="keyword">int</span>&gt; PII;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> n, m, x, y, z, u, v, w, du;</span><br><span class="line"><span class="keyword">int</span> d[<span class="number">501</span>];</span><br><span class="line"><span class="keyword">bool</span> vis[<span class="number">501</span>];</span><br><span class="line">map&lt;<span class="keyword">int</span>, <span class="keyword">int</span>&gt; G[<span class="number">501</span>];</span><br><span class="line">priority_queue&lt;PII，vector&lt;PII&gt;, greater&lt;PII&gt;&gt; Q;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> INITIALIZE-SINGLE-<span class="built_in">SOURCE</span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=n; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        d[i] = <span class="number">-1</span>;</span><br><span class="line">        vis[i] = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    d[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EXTRACT_MIN</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    u = Q.<span class="built_in">top</span>().second;</span><br><span class="line">    du = Q.<span class="built_in">top</span>().first;</span><br><span class="line">    Q.<span class="built_in">pop</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">RELAX</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (d[v] == <span class="number">-1</span> || d[v] &gt; d[u] + w)</span><br><span class="line">        d[v] = d[u] + w;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cin &gt;&gt; n &gt;&gt; m;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;n; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        cin &gt;&gt; x &gt;&gt; y &gt;&gt; z;</span><br><span class="line">        <span class="keyword">if</span> (x == y) <span class="keyword">continue</span>;   <span class="comment">// 去除自环</span></span><br><span class="line">        <span class="keyword">if</span> (G[x].<span class="built_in">find</span>(y) == G.<span class="built_in">end</span>() || G[x][y] &gt; z)     <span class="comment">// 检查重边</span></span><br><span class="line">            G[x][y] = z;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    INITIALIZE-SINGLE-<span class="built_in">SOURCE</span>();</span><br><span class="line">    Q.<span class="built_in">push</span>(&#123;<span class="number">0</span>, <span class="number">1</span>&#125;);</span><br><span class="line">    <span class="keyword">while</span> (!Q.<span class="built_in">empty</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">EXTRACT_MIN</span>();</span><br><span class="line">        <span class="keyword">if</span> (vis[u]) <span class="keyword">continue</span>;</span><br><span class="line">        vis[u] = <span class="literal">true</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> iter = G[u].<span class="built_in">begin</span>(); iter != G[u].<span class="built_in">end</span>(); ++iter)</span><br><span class="line">        &#123;</span><br><span class="line">            v = iter-&gt;second;</span><br><span class="line">            w = iter-&gt;first;</span><br><span class="line">            <span class="keyword">if</span> (vis[v]) <span class="keyword">continue</span>;</span><br><span class="line">            </span><br><span class="line">            <span class="built_in">RELAX</span>();</span><br><span class="line">            Q.<span class="built_in">push</span>(&#123;d[v], v&#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    cout &lt;&lt; d[n] &lt;&lt; endl;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span>；</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="时间复杂度"><a class="markdownIt-Anchor" href="#时间复杂度"></a> 时间复杂度</h2>
-<p>首先考虑用一维数组来实现优先队列 <code>Q</code> ，每次 EXTRACT-MIN 操作运行时间为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>V</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(V)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mclose">)</span></span></span></span>，存在 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|V|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mord">∣</span></span></span></span> 次这样的操作，总时间为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>V</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(V^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 。因为每个结点 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span></span></span></span> 仅被插入集合 <code>S</code> 一次，邻接表中边的总数为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|E|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mord">∣</span></span></span></span> ，所以在 For 循环中总共存在 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|E|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mord">∣</span></span></span></span> 次迭代，每次迭代运行时间为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>，因此整个算法的运行时间为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>V</mi><mn>2</mn></msup><mo>+</mo><mi>E</mi><mo stretchy="false">)</mo><mo>=</mo><mi>O</mi><mo stretchy="false">(</mo><msup><mi>V</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(V^2+E) = O(V^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 。</p>
-<p>但在稀疏图的情况下，用二叉堆来实现优先队列 <code>Q</code> 是比较实用的。在该算法实现下，每个 EXTRACT-MIN 操作需要时间为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>l</mi><mi>g</mi><mi>V</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(lgV)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mclose">)</span></span></span></span> ，存在 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|V|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mord">∣</span></span></span></span> 次这样的操作 ，建立二叉堆需要时间为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>V</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(V)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mclose">)</span></span></span></span> 。在 RELAX 中是通过调整结点 <code>v</code> 在二叉堆中的位置来完成的，运行时间为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>V</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(logV)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mclose">)</span></span></span></span>，并且至多存在 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|E|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mord">∣</span></span></span></span> 次这样的操作，因此算法的全部运行时间为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mo stretchy="false">(</mo><mi>V</mi><mo>+</mo><mi>E</mi><mo stretchy="false">)</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>V</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O((V+E)logV)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mclose">)</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mclose">)</span></span></span></span> ，通常情况下，边数 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|E|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mord">∣</span></span></span></span> 都不小于结点数 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|V|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mord">∣</span></span></span></span> ，所以运行时间又可以简化为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>E</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>V</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(ElogV)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mclose">)</span></span></span></span> 。</p>
-<h1 id="bellman-ford"><a class="markdownIt-Anchor" href="#bellman-ford"></a> Bellman-Ford</h1>
-<figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">Bellman</span><span class="operator">-</span><span class="variable">Ford</span><span class="punctuation">(</span><span class="variable">G</span><span class="operator">,</span><span class="variable">w</span><span class="operator">,</span><span class="variable">s</span><span class="punctuation">)</span></span><br><span class="line"><span class="number">1.</span>  <span class="variable">INITIALIZE</span><span class="operator">-</span><span class="variable">SINGLE</span><span class="operator">-</span><span class="variable">SOURCE</span><span class="punctuation">(</span><span class="variable">G</span><span class="operator">,</span><span class="variable">s</span><span class="punctuation">)</span></span><br><span class="line"><span class="number">2.</span>  <span class="built_in">For</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span> <span class="variable">to</span> <span class="operator">|</span><span class="variable">V</span><span class="punctuation">[</span><span class="variable">G</span><span class="punctuation">]</span><span class="operator">|</span> <span class="operator">-</span> <span class="number">1</span></span><br><span class="line"><span class="number">3.</span>    <span class="built_in">Do</span> <span class="built_in">For</span> 每条边 <span class="punctuation">(</span><span class="variable">u</span><span class="operator">,</span><span class="variable">v</span><span class="punctuation">)</span> ∈ <span class="built_in">E</span><span class="punctuation">[</span><span class="variable">G</span><span class="punctuation">]</span></span><br><span class="line"><span class="number">4.</span>       <span class="built_in">Do</span> <span class="variable">RELAX</span><span class="punctuation">(</span><span class="variable">u</span><span class="operator">,</span><span class="variable">v</span><span class="operator">,</span><span class="variable">w</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"><span class="number">5.</span>  <span class="built_in">For</span> 每条边 <span class="punctuation">(</span><span class="variable">u</span><span class="operator">,</span><span class="variable">v</span><span class="punctuation">)</span> ∈ <span class="built_in">E</span><span class="punctuation">[</span><span class="variable">G</span><span class="punctuation">]</span></span><br><span class="line"><span class="number">6.</span>    <span class="built_in">Do</span> <span class="built_in">If</span> <span class="variable">d</span><span class="punctuation">[</span><span class="variable">v</span><span class="punctuation">]</span> <span class="operator">&gt;</span> <span class="variable">d</span><span class="punctuation">[</span><span class="variable">u</span><span class="punctuation">]</span> <span class="operator">+</span> <span class="variable">w</span><span class="punctuation">(</span><span class="variable">u</span><span class="operator">,</span><span class="variable">v</span><span class="punctuation">)</span></span><br><span class="line"><span class="number">7.</span>       <span class="variable">Then</span> <span class="built_in">Return</span> <span class="variable">FALSE</span></span><br><span class="line"><span class="number">8.</span>  <span class="built_in">Return</span> <span class="variable">TRUE</span></span><br></pre></td></tr></table></figure>
-<p>Bellman-Ford 算法能在更一般的情况下解决单源点最短路径问题，在该算法下<font color=red>边的权值可以为负</font>。正如 Dijkstra 算法一样，Bellman-Ford 算法运用了松弛技术，对每一个结点 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span></span></span></span>，逐步减小从源 <code>s</code> 到 <code>v</code> 的最短路径的估计值 <code>d[v]</code> 直至达到实际最短路径 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>δ</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\delta(s,v)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03785em;">δ</span><span class="mopen">(</span><span class="mord mathdefault">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mclose">)</span></span></span></span>，如果图中存在<font color=red>负权回路</font>，算法将会报告最短路径不存在。</p>
-<p>该算法的思想基于以下事实：两点间如果有最短路径，那么每个结点最多经过一次，即最短路径最长只有 V - 1 条边，因此最多只需要迭代 V - 1 次就可以求出最短路径。</p>
-<p>时间复杂度为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>V</mi><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(VE)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mclose">)</span></span></span></span>，在很多时候，并不需要运行 |V|-1 次就能得到最优值了：对于一次完整的第 3-4 行操作，如果一个节点的最短路径估计值都没更新，那么就可以退出了。大多数情况下，时间复杂度将降低为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>k</mi><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(kE)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mclose">)</span></span></span></span>，其中 <code>k</code> 是一个比 |V| 小很多的数。</p>
-<h1 id="spfa"><a class="markdownIt-Anchor" href="#spfa"></a> SPFA</h1>
-<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="constructor">SPFA(G,<span class="params">w</span>,<span class="params">s</span>)</span></span><br><span class="line"><span class="number">1.</span>  INITIALIZE-SINGLE-<span class="constructor">SOURCE(G,<span class="params">s</span>)</span></span><br><span class="line"><span class="number">2.</span>  INITIALIZE-<span class="constructor">QUEUE(Q)</span></span><br><span class="line"><span class="number">3.</span>  <span class="constructor">ENQUEUE(Q,<span class="params">s</span>)</span></span><br><span class="line"><span class="number">4.</span>  While Not <span class="constructor">EMPTY(Q)</span></span><br><span class="line"><span class="number">5.</span>    Do u = <span class="constructor">DEQUEUE(Q)</span></span><br><span class="line"><span class="number">6.</span>       For 每条边 (u,v)∈E<span class="literal">[G]</span></span><br><span class="line"><span class="number">7.</span>         Do tmp &lt;- d<span class="literal">[<span class="identifier">v</span>]</span></span><br><span class="line"><span class="number">8.</span>            <span class="constructor">RELAX(<span class="params">u</span>,<span class="params">v</span>,<span class="params">w</span>)</span></span><br><span class="line"><span class="number">9</span>,            If (d<span class="literal">[<span class="identifier">v</span>]</span> &lt; tmp) <span class="keyword">and</span> (v 不在 Q 中)</span><br><span class="line"><span class="number">10.</span>              <span class="constructor">ENQUEUE(Q,<span class="params">v</span>)</span></span><br></pre></td></tr></table></figure>
-<h2 id="定理3"><a class="markdownIt-Anchor" href="#定理3"></a> 定理3</h2>
-<blockquote>
-<p>只要最短路径存在，上述 SPFA 算法必定能求出最小值。</p>
-</blockquote>
-<h2 id="定理4"><a class="markdownIt-Anchor" href="#定理4"></a> 定理4</h2>
-<blockquote>
-<p>在平均情况下，SPFA 算法的期望时间复杂度为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mclose">)</span></span></span></span>。</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2021/04/05/algorithm/dp/dp-bag/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="被子">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="被子的博客">
-      <meta itemprop="description" content="描述">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 被子的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/04/05/algorithm/dp/dp-bag/" class="post-title-link" itemprop="url">DP - 背包问题汇总</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-04-05 03:31:20" itemprop="dateCreated datePublished" datetime="2021-04-05T03:31:20+08:00">2021-04-05</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-05-11 08:21:36" itemprop="dateModified" datetime="2022-05-11T08:21:36+08:00">2022-05-11</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95/DP/" itemprop="url" rel="index"><span itemprop="name">DP</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="01背包问题"><a class="markdownIt-Anchor" href="#01背包问题"></a> 01背包问题</h1>
-<blockquote>
-<p>有 <code>N</code> 件物品和一个容量是 <code>V</code> 的背包，第 i 件物品的体积是 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，价值是 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，每件物品只能使用一次。求解将哪些物品装入背包，可使这些物品的总体积不超过 <code>V</code>，且总价值最大。</p>
-</blockquote>
-<h2 id="推导"><a class="markdownIt-Anchor" href="#推导"></a> 推导</h2>
-<div class="note "><p>令 f[i][j] 表示仅考虑前 i 件物品且总体积不超过 j 的情况下能够获得的最大价值，根据选不选第 i 件物品，我们可以很容易推出如下公式：</p>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mi>j</mi><mo stretchy="false">]</mo><mo>=</mo><mi>m</mi><mi>a</mi><mi>x</mi><mrow><mo fence="true">{</mo><mtable rowspacing="0.3599999999999999em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>f</mi><mo stretchy="false">[</mo><mi>i</mi><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mi>j</mi><mo stretchy="false">]</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>不选择第 i 件物品</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>f</mi><mo stretchy="false">[</mo><mi>i</mi><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mi>j</mi><mo>−</mo><msub><mi>v</mi><mi>i</mi></msub><mo stretchy="false">]</mo><mo>+</mo><msub><mi>w</mi><mi>i</mi></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>选择第 i 件物品</mtext></mstyle></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">f[i][j] = max \begin{cases}
-  f[i-1][j] &amp;\text{不选择第 i 件物品} \\
-  f[i-1][j-v_i]+w_i &amp;\text{选择第 i 件物品}
-\end{cases}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:3.0000299999999998em;vertical-align:-1.25003em;"></span><span class="mord mathdefault">m</span><span class="mord mathdefault">a</span><span class="mord mathdefault">x</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size4">{</span></span><span class="mord"><span class="mtable"><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.69em;"><span style="top:-3.69em;"><span class="pstrut" style="height:3.008em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mclose">]</span></span></span><span style="top:-2.25em;"><span class="pstrut" style="height:3.008em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.19em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:1em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.69em;"><span style="top:-3.69em;"><span class="pstrut" style="height:3.008em;"></span><span class="mord"><span class="mord text"><span class="mord cjk_fallback">不选择第</span><span class="mord"> i </span><span class="mord cjk_fallback">件物品</span></span></span></span><span style="top:-2.25em;"><span class="pstrut" style="height:3.008em;"></span><span class="mord"><span class="mord text"><span class="mord cjk_fallback">选择第</span><span class="mord"> i </span><span class="mord cjk_fallback">件物品</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.19em;"><span></span></span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
-</div>
-<h2 id="优化"><a class="markdownIt-Anchor" href="#优化"></a> 优化</h2>
-<p>我们可以看到对于每一个 i 来说, f[i][j] 的结果只依赖于 f[i-1][]，即每一次迭代只需要上一次的迭代结果，这就可以转换成一个数学归纳问题。假设 f[j] = f[i-1][j] 成立，我们需要从这个条件计算出新的 f[j] = f[i][j] 成立就可以了。 根据上面的公式，f[i][j] 有两种结果：</p>
-<ol>
-<li>= f[i-1][j] 由假设可知就等于 f[j]</li>
-<li>= f[i-1][j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 同理由假设可知就等于 f[j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，<font color=red>但是！！！这里有个前提就是 f[j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>] 必须任然是上一次迭代的结果不能被改动过</font>。</li>
-</ol>
-<p>综上，当我们倒叙遍历 f[j] 就能完美解决这个问题了！</p>
-<h2 id="代码"><a class="markdownIt-Anchor" href="#代码"></a> 代码</h2>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=N; ++i)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j=V; j&gt;=v; --j)</span><br><span class="line">        f[j] = <span class="built_in">max</span>(f[j], f[j-v]+w);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="完全背包问题"><a class="markdownIt-Anchor" href="#完全背包问题"></a> 完全背包问题</h1>
-<blockquote>
-<p>同 01背包问题，唯一区别在于每件物品可以选取无限次。</p>
-</blockquote>
-<h2 id="推导-2"><a class="markdownIt-Anchor" href="#推导-2"></a> 推导</h2>
-<div class="note "><p>令 f[i][j] 表示仅考虑前 i 件物品且总体积不超过 j 的情况下能够获得的最大价值，根据第 i 件物品可以选 0、1、…、k，我们可以推出<br />
-f[i][j] = max{ f[i-1][j], f[i-1][j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, f[i-1][j-2<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+2<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> , … , f[i-1][j-k<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+k<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> }<br />
-我们将 j 替换为 j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>,则有<br />
-f[i][j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>] = max{ f[i-1][j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>], f[i-1][j-2<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, f[i-1][j-3<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+2<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> , … , f[i-1][j-k<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+(k-1)<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> }<br />
-比较前2个式子，可以得出<br />
-f[i][j] = max{ f[i-1][j], f[i][j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> }</p>
-</div>
-<h2 id="优化-2"><a class="markdownIt-Anchor" href="#优化-2"></a> 优化</h2>
-<p>同样我们将其转换为数学归纳问题，假设 f[j] = f[i-1][j] 成立，我们需要从这个条件计算出新的 f[j] = f[i][j] 成立就可以了，根据上面的公式，f[i][j] 有两种结果：</p>
-<ol>
-<li>= f[i-1][j] 由假设可知就等于 f[j]</li>
-<li>= f[i][j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 注意！！！ 这里是等于 <font color=red>f[i]</font>[j-<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>]+<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 即这里需要的是这次迭代的计算结果而不是上次迭代的！</li>
-</ol>
-<p>综上，当我们顺序遍历 f[j] 就能完美解决这个问题了！</p>
-<h2 id="代码-2"><a class="markdownIt-Anchor" href="#代码-2"></a> 代码</h2>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=N; ++i)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j=v; j&lt;=V; ++j)</span><br><span class="line">        f[j] = <span class="built_in">max</span>(f[j], f[j-v]+w);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="多重背包问题"><a class="markdownIt-Anchor" href="#多重背包问题"></a> 多重背包问题</h1>
-<blockquote>
-<p>有 <code>N</code> 件物品和一个容量是 <code>V</code> 的背包，第 i 件物品最多有 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">s_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 件，每件体积是 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">v_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，价值是 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。求解将哪些物品装入背包，可使这些物品的总体积不超过 <code>V</code>，且总价值最大。</p>
-</blockquote>
-<p>可以直接转为01背包问题，时间复杂度为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>V</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(NVs)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.10903em;">N</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mord mathdefault">s</span><span class="mclose">)</span></span></span></span></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=N; ++i)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> k=<span class="number">1</span>; k&lt;=s; ++k)</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j=V; j&gt;=v; --j)</span><br><span class="line">            f[j] = <span class="built_in">max</span>(f[j], f[j-v]+w);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>或者按照递推公式</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=N; ++i)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j=V; j&gt;=v; --j)</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> k=<span class="number">1</span>; k&lt;=s &amp;&amp; k*v&lt;=j; ++k)</span><br><span class="line">            f[j] = <span class="built_in">max</span>(f[j], f[j-k*v]+k*w);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="优化1-二进制优化"><a class="markdownIt-Anchor" href="#优化1-二进制优化"></a> 优化1 - 二进制优化</h2>
-<p>可以将第 i 件物品分成 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">s_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> = 1 + 2 + … + k，时间复杂度为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>V</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(NVlogs)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.10903em;">N</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">s</span><span class="mclose">)</span></span></span></span></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=N; ++i)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> k=<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (k &lt;= s)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j=V; j&gt;=k*v; --j)</span><br><span class="line">            f[j] = <span class="built_in">max</span>(f[j], f[j-k*v]+k*w);</span><br><span class="line">        s -= k;</span><br><span class="line">        k *= <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j=V; j&gt;=s*v; --j)</span><br><span class="line">        f[j] = <span class="built_in">max</span>(f[j], f[j-s*v]+s*w);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="优化2-单调队列优化"><a class="markdownIt-Anchor" href="#优化2-单调队列优化"></a> 优化2 - 单调队列优化</h2>
-<p><font color=red>关键点：将 f[V] 数组根据 j % v 的结果分成 v 组，v 组之间是互相独立没有影响的（这是因为 f[j] 只和 f[j - kv] 结果有关）</font>。 那么<br />
-f[j] = max{ f[j-v]+w, f[j-2<em>v]+2</em>w, … , f[j-k<em>v]+k</em>w }<br />
-f[j+v] = max{ f[j]+w, f[j-v]+2*w, … , f[j-(k-1)*v]+(k-1)*w }<br />
-这就转换成一个典型的单调队列问题 （求连续 k 区间内的最大值），连续区间为 f[j], f[j+v]-w, f[j+2v]-2w, … , f[j+kv]-kw ，时间复杂度为 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>V</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Omicron(NV)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathrm">O</span></span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.10903em;">N</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mclose">)</span></span></span></span></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> N, V, v, w, s;</span><br><span class="line"><span class="keyword">int</span> f[N], g[N], q[N];</span><br><span class="line"></span><br><span class="line">cin &gt;&gt; N &gt;&gt; V;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=N; ++i)</span><br><span class="line">&#123;</span><br><span class="line">    cin &gt;&gt; v &gt;&gt; w &gt;&gt; s;</span><br><span class="line">    <span class="built_in">memcpy</span>(g, f, <span class="keyword">sizeof</span> f);     <span class="comment">// g 保存上次迭代的结果</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> k=<span class="number">0</span>; k&lt;v; ++k)     <span class="comment">// 遍历余数 % v，分为 v 组</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> h=<span class="number">0</span>, t=<span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j=k; j&lt;=V; j+=v)</span><br><span class="line">        &#123;</span><br><span class="line">            f[j] = g[j]; </span><br><span class="line">            <span class="keyword">if</span> (h&lt;=t &amp;&amp; j-s*v&gt;q[h]) ++h;    <span class="comment">// 如果队列内超过了 s 个数则弹出队首元素</span></span><br><span class="line">            <span class="keyword">if</span> (h&lt;=t) f[j] = <span class="built_in">max</span>(f[j], g[q[h]] + (j - q[h]) / v * w);</span><br><span class="line">            <span class="keyword">while</span> (h &lt;= t &amp;&amp; g[q[t]] - (q[t] - k) / v * w &lt;= g[j] - (j - k) / v * w) --t;   <span class="comment">// 删除无用的队尾元素</span></span><br><span class="line">            q[++t] = k;         <span class="comment">// 插入队尾</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; f[V] &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
 
 </div>
   </main>

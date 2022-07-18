@@ -25,7 +25,7 @@
     <meta name="description" content="线性变换  f(x)+f(y)&#x3D;f(x+y)kf(x)&#x3D;f(kx)\begin{aligned} f(x) + f(y) &amp;&#x3D; f(x+y) \\ kf(x) &amp;&#x3D; f(kx) \end{aligned} f(x)+f(y)kf(x)​&#x3D;f(x+y)&#x3D;f(kx)​    仿射变换  仿射变换可以将线性变换和平移组合在一起，通常储存为一个 4x4 矩阵，所有平移、旋转、缩放、反射">
 <meta property="og:type" content="article">
 <meta property="og:title" content="实时渲染 - 4. 变换 Part 1">
-<meta property="og:url" content="https://beizi-blog.cn/2022/06/28/rtr/transform/index.html">
+<meta property="og:url" content="https://beizi-blog.cn/2022/06/28/rtr/transform1/index.html">
 <meta property="og:site_name" content="被子的博客">
 <meta property="og:description" content="线性变换  f(x)+f(y)&#x3D;f(x+y)kf(x)&#x3D;f(kx)\begin{aligned} f(x) + f(y) &amp;&#x3D; f(x+y) \\ kf(x) &amp;&#x3D; f(kx) \end{aligned} f(x)+f(y)kf(x)​&#x3D;f(x+y)&#x3D;f(kx)​    仿射变换  仿射变换可以将线性变换和平移组合在一起，通常储存为一个 4x4 矩阵，所有平移、旋转、缩放、反射">
 <meta property="og:locale" content="zh_CN">
@@ -46,11 +46,11 @@
 <meta name="twitter:image" content="https://beizi-blog.cn/images/rtr/shear.jpg">
 
 
-<link rel="canonical" href="https://beizi-blog.cn/2022/06/28/rtr/transform/">
+<link rel="canonical" href="https://beizi-blog.cn/2022/06/28/rtr/transform1/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://beizi-blog.cn/2022/06/28/rtr/transform/","path":"2022/06/28/rtr/transform/","title":"实时渲染 - 4. 变换 Part 1"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://beizi-blog.cn/2022/06/28/rtr/transform1/","path":"2022/06/28/rtr/transform1/","title":"实时渲染 - 4. 变换 Part 1"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>实时渲染 - 4. 变换 Part 1 | 被子的博客</title>
@@ -148,13 +148,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -198,7 +198,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/06/28/rtr/transform/">
+    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/06/28/rtr/transform1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -682,6 +682,9 @@ l &amp;\le n\frac{p_x}{p_z} \le r \\
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2022/07/11/rtr/transform2/" rel="next" title="实时渲染 - 4. 变换 Part 2">
+                  实时渲染 - 4. 变换 Part 2 <i class="fa fa-chevron-right"></i>
+                </a>
             </div>
           </div>
     </footer>
