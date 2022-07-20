@@ -134,7 +134,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-count">13</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -183,6 +183,373 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/07/18/dx12/guide4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="被子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="被子的博客">
+      <meta itemprop="description" content="描述">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 被子的博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/07/18/dx12/guide4/" class="post-title-link" itemprop="url">Direct3D 12 - 资源绑定 Part 3</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-07-18 22:53:26" itemprop="dateCreated datePublished" datetime="2022-07-18T22:53:26+08:00">2022-07-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-07-20 22:24:30" itemprop="dateModified" datetime="2022-07-20T22:24:30+08:00">2022-07-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Direct3D-12/" itemprop="url" rel="index"><span itemprop="name">Direct3D 12</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/direct3d12/resource-binding">Resource Binding in Direct3D 12</a></p>
+<h1 id="descriptor-heaps"><a class="markdownIt-Anchor" href="#descriptor-heaps"></a> Descriptor Heaps</h1>
+<h2 id="设计目的"><a class="markdownIt-Anchor" href="#设计目的"></a> 设计目的</h2>
+<blockquote>
+<p>主要目的是提供大部分的内存空间用于储存在一帧或多帧渲染中 shaders 需要引用的所有 descriptors，应用程序可以选择复用 descriptor，或者按顺序分配 heap 空间。</p>
+<p>所有 heaps 对 CPU 可见，应用程序也可以请求一个 descriptor heap 需要哪种 CPU 访问属性 - write combined，write back 等</p>
+<p>Descriptor heaps 只能被 CPU 即时编辑，不能被 GPU 编辑</p>
+</blockquote>
+<h2 id="同步"><a class="markdownIt-Anchor" href="#同步"></a> 同步</h2>
+<blockquote>
+<p>Descriptor heap 内容可以在记录命令列表之前、之间以及之后被修改，然而，descriptors 不能被修改当一个已经提交执行的命令列表可能会引用该位置时，因为这可能会导致竞争。</p>
+</blockquote>
+<h2 id="绑定"><a class="markdownIt-Anchor" href="#绑定"></a> 绑定</h2>
+<blockquote>
+<p>在任何一个时刻，最多只能绑定一个 CBV/SRV/UAV heap 和一个 Sampler heap，这些 heaps 在 graphics 和 compute pipelines 之间共享。</p>
+</blockquote>
+<h2 id="切换-heaps"><a class="markdownIt-Anchor" href="#切换-heaps"></a> 切换 heaps</h2>
+<blockquote>
+<p>应用程序可以在同一个或者不同的命令列表中切换 heaps，使用 SetDescriptorHeaps 和 Reset API。在一些硬件上，这会是一个昂贵的操作，要求 GPU 停下去完成所有依赖当前绑定的 descriptor heap 的工作。因此，应用程序应该试着在 GPU 负载较轻的时候进行此操作，或者在命令列表一开始就限制不再改变 descriptor heap。</p>
+</blockquote>
+<h1 id="shader-可见-descriptor-heaps"><a class="markdownIt-Anchor" href="#shader-可见-descriptor-heaps"></a> Shader 可见 Descriptor Heaps</h1>
+<blockquote>
+<p>Shader 可见 Descriptor heaps 可以通过 descriptor tables 被 shaders 引用，主要有 2 类：</p>
+<ul>
+<li>D3D12_SRV_UAV_CBV_DESCRIPTOR_HEAP</li>
+<li>D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER</li>
+</ul>
+<p>应用程序可以创建任意数量的 descriptor heaps，shader 可见的 descriptor heap 有硬件大小的限制，而非 shader 可见的 descriptor heap 没有大小限制；如果创建的 shader 可见 descriptor heap 小于硬件大小的限制，驱动程序可能会选择把该 descriptor heap 分配在一个更大的硬件 descriptor heap，这是因为切换硬件上的 descriptor heaps 会导致 GPU 停下等待。</p>
+</blockquote>
+<h2 id="示例"><a class="markdownIt-Anchor" href="#示例"></a> 示例</h2>
+<p><img src="/images/dx12/descriptor_heap.jpg" alt="" /></p>
+<h1 id="shader-不可见-descriptor-heaps"><a class="markdownIt-Anchor" href="#shader-不可见-descriptor-heaps"></a> Shader 不可见 Descriptor Heaps</h1>
+<blockquote>
+<p>需要 Shader 不可见 descriptor heaps 的原因之一是，这些 heaps 主要是用于暂存以供之后再使用。除此之外，有一些 descriptors 是在记录命令列表的时候直接绑定到 pipeline，只用于传递 view 参数，这些 heaps 永远是 shader 不可见的，包括如下这些：</p>
+<ul>
+<li>RTVs</li>
+<li>DSVs</li>
+<li>IBVs</li>
+<li>VBVs</li>
+<li>SOVs</li>
+</ul>
+<p>在记录到命令列表之后 (例如调用 OMSetRenderTargets)，存放这些 descriptors 的内存可以立即被复用。</p>
+</blockquote>
+<h2 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Shader 可见，CPU 只写</th>
+<th>Shader 不可见，CPU 可读/写</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CBV，SRV，UAV</td>
+<td>√</td>
+<td>√</td>
+</tr>
+<tr>
+<td>SAMPLER</td>
+<td>√</td>
+<td>√</td>
+</tr>
+<tr>
+<td>RTV</td>
+<td>×</td>
+<td>√</td>
+</tr>
+<tr>
+<td>DSV</td>
+<td>×</td>
+<td>√</td>
+</tr>
+</tbody>
+</table>
+<h1 id="创建-descriptor-heaps"><a class="markdownIt-Anchor" href="#创建-descriptor-heaps"></a> 创建 Descriptor Heaps</h1>
+<h2 id="类型"><a class="markdownIt-Anchor" href="#类型"></a> 类型</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> <span class="title">D3D12_DESCRIPTOR_HEAP_TYPE</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,    <span class="comment">// Constant buffer/Shader resource/Unordered access views</span></span><br><span class="line">    D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,        <span class="comment">// Samplers</span></span><br><span class="line">    D3D12_DESCRIPTOR_HEAP_TYPE_RTV,            <span class="comment">// Render target view</span></span><br><span class="line">    D3D12_DESCRIPTOR_HEAP_TYPE_DSV,            <span class="comment">// Depth stencil view</span></span><br><span class="line">    D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES       <span class="comment">// Simply the number of descriptor heap types</span></span><br><span class="line">&#125; D3D12_DESCRIPTOR_HEAP_TYPE;</span><br></pre></td></tr></table></figure>
+<h2 id="属性"><a class="markdownIt-Anchor" href="#属性"></a> 属性</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_DESCRIPTOR_HEAP_DESC</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    D3D12_DESCRIPTOR_HEAP_TYPE  Type;</span><br><span class="line">    UINT                        NumDescriptors;</span><br><span class="line">    D3D12_DESCRIPTOR_HEAP_FLAGS Flags;</span><br><span class="line">    UINT                        NodeMask;</span><br><span class="line">&#125; D3D12_DESCRIPTOR_HEAP_DESC;</span><br></pre></td></tr></table></figure>
+<h2 id="示例-2"><a class="markdownIt-Anchor" href="#示例-2"></a> 示例</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Describe and create a sampler descriptor heap.</span></span><br><span class="line">D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc = &#123;&#125;;</span><br><span class="line">samplerHeapDesc.NumDescriptors = <span class="number">1</span>;</span><br><span class="line">samplerHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;</span><br><span class="line">samplerHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;</span><br><span class="line"><span class="built_in">ThrowIfFailed</span>(m_device-&gt;<span class="built_in">CreateDescriptorHeap</span>(&amp;samplerHeapDesc, <span class="built_in">IID_PPV_ARGS</span>(&amp;m_samplerHeap)));</span><br></pre></td></tr></table></figure>
+<h1 id="设置-descriptor-heaps"><a class="markdownIt-Anchor" href="#设置-descriptor-heaps"></a> 设置 descriptor heaps</h1>
+<blockquote>
+<p>在命令列表里可以设置的 descriptor heap 类型有：</p>
+<ul>
+<li>D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV</li>
+<li>D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER</li>
+</ul>
+<p>在命令列表里设置的 heap 必须是 shader 可见的</p>
+<p>在 bundle 里 descriptor heaps 只能被设置 1 次，并且设置的 heap 必须匹配调用该 bundle 的命令列表的状态，这允许 bundle 继承和编辑命令列表的 descriptor table 设置。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> ID3D12GraphicsCommandList::SetDescriptorHeaps</span><br><span class="line">(</span><br><span class="line">    UINT                 NumDescriptorHeaps,</span><br><span class="line">    ID3D12DescriptorHeap * <span class="keyword">const</span> *ppDescriptorHeaps</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h1 id="populating-descriptor-heaps"><a class="markdownIt-Anchor" href="#populating-descriptor-heaps"></a> Populating descriptor heaps</h1>
+<blockquote>
+<p>当应用程序创建了一个 descriptor heap 之后，其内存中的初始数据是未定义的，可以使用方法直接在 heap 里创建 descriptors 或者从其他地方复制过来。</p>
+<p>当应用程序配置一个 descriptor heap 为 CPU 可见，那么 CPU 可以调用方法在 heap 中创建 descriptors 或者复制 descriptor；如果 heap 为 shader 可见，那么从 CPU 读取是不允许的。</p>
+</blockquote>
+<h1 id="descriptor-heap-配置总结"><a class="markdownIt-Anchor" href="#descriptor-heap-配置总结"></a> Descriptor Heap 配置总结</h1>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>shader 可见 descriptor heap</th>
+<th>shader 不可见 descriptor heap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>支持的类型</td>
+<td>CBV_SRV_UAV，Sampler</td>
+<td>All</td>
+</tr>
+<tr>
+<td>支持的 CPU Page 属性</td>
+<td>NOT_AVAILABLE, WRITE_COMBINE</td>
+<td>WRITE_BACK</td>
+</tr>
+<tr>
+<td>是否 App 管理内存驻留</td>
+<td>√</td>
+<td>不适用 (因为 GPU 不可见)</td>
+</tr>
+<tr>
+<td>支持的 Descriptor 编辑方式</td>
+<td>Copy destination only，via command list update and/or CPU copy if CPU visible</td>
+<td>CPU read and write only. No direct GPU access. Can be used for immediate CPU copying (as a source and destination). Can be used as an update source on a command list - this will copy the descriptors into command list storage during command list record. On execution, the stored copy will get copied to the destination, which must be a shader visible heap.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="descriptor-tables"><a class="markdownIt-Anchor" href="#descriptor-tables"></a> Descriptor Tables</h1>
+<blockquote>
+<p>每一个 descriptor table 储存 一种或多种类型 descriptors - SRVs，UAVs，CBVs，和 samplers，descriptor table 并没有实际分配内存，只是指向在 descriptor heap 中的偏移和长度。</p>
+<p><img src="/images/dx12/descriptor_table.jpg" alt="" /></p>
+<p>Descriptor tables 通过命令列表中定义的当前 root signature 绑定到 slot 上</p>
+</blockquote>
+<h1 id="root-signatures"><a class="markdownIt-Anchor" href="#root-signatures"></a> Root Signatures</h1>
+<blockquote>
+<p>应用程序通过配置 root signature 将命令列表连接到 shaders 所需要的资源，graphics 命令列表有一个 graphics root signature 和一个 compute root signature，compute 命令列表只有一个 compute root signature，这些 root signatures 之间是互相独立的。</p>
+</blockquote>
+<h2 id="root-parameters-和-arguments"><a class="markdownIt-Anchor" href="#root-parameters-和-arguments"></a> Root parameters 和 arguments</h2>
+<blockquote>
+<p>root signature 和一个 API 函数签名类似，决定了 shaders 应该期望的数据类型，但并不实际定义数据或内存。root parameter 是在 root signature 中的一个入口，而在运行时实际设置的 root parameters 的值称为 root arguments；改变 root arguments 将改变 shaders 所读取的数据。</p>
+</blockquote>
+<h2 id="root-constantsdescriptors-和-tables"><a class="markdownIt-Anchor" href="#root-constantsdescriptors-和-tables"></a> Root constants，descriptors 和 tables</h2>
+<blockquote>
+<p>Root signature 包含 3 种类型参数：</p>
+<ul>
+<li>root constants</li>
+<li>root descriptors</li>
+<li>descriptor tables (指向 descriptor heap 中的某一个范围的 descriptors)</li>
+</ul>
+<p><strong>Root constants</strong> 是一些 32 位的值，在 shader 中显示为 constant buffer</p>
+<p><strong>Root descriptors</strong> 应该包含最频繁访问的 descriptors，但是仅限于 CBVs，UAV 或者 SRV；Root descriptos 没有大小限制，因此没有越界检查。</p>
+<p><strong>Root tables entries</strong> 包含 descriptor， HLSL shader 绑定名称和可见性标志。在一些硬件上，设置 descriptors 只对需要的 shader 阶段可见会有性能提升。</p>
+<p><img src="/images/dx12/root_signature.jpg" alt="" /></p>
+<p>Root signature 的布局非常灵活，不考虑硬件水平，应用程序应该使 root signature 尽可能小以最大化效率。</p>
+<p>理想情况下，一组 PSOs 会共享同一个 root signature；当一个 root signature 被设置到 pipeline 之后，其所有定义的绑定 (descriptor tables，descriptors，constants) 都可以单独被设置或改变，包括继承到 bundles 中的配置。</p>
+</blockquote>
+<h1 id="使用-root-signature"><a class="markdownIt-Anchor" href="#使用-root-signature"></a> 使用 Root Signature</h1>
+<blockquote>
+<p>应用程序可以通过 API 创建 root signature 对象，在 PSO 中的所有 shaders 必须和 PSO 中指定的 root layout 匹配，或者每一个 shaders 必须包括内置的 root layouts，否则 PSO 创建会失败。</p>
+</blockquote>
+<h2 id="命令列表语义"><a class="markdownIt-Anchor" href="#命令列表语义"></a> 命令列表语义</h2>
+<blockquote>
+<p>在命令列表开始执行时，root signature 是未定义的；在 Draw/Dispatch 时，命令列表或 bundle 中设置的 root signature 必须和当前设置的 PSO 匹配；设置 PSO 对象不会改变 root signature，应用程序必须调用专门的 API 设置 root signature</p>
+<p>一旦在命令列表中设置了 root signature，就定义了应用程序期望提供的绑定集合，以及在一次 draw/dispatch 调用时使用哪一个 PSO 对象。例如，可以定义一个 root signature 包含如下 entries，每一个 entiry 可以被认为是一个 slot：</p>
+<ul>
+<li>[0] A CBV descriptor inline</li>
+<li>[1] A descriptor table containing 2 SRVs，1 CBVs 和 1 UAV</li>
+<li>[2] A descriptor table containing 1 sampler</li>
+<li>[3] A 4x32-bit collection of root constants</li>
+<li>[4] A descriptor table containing an unspecified number of SRVs</li>
+</ul>
+</blockquote>
+<h2 id="bundle-语义"><a class="markdownIt-Anchor" href="#bundle-语义"></a> Bundle 语义</h2>
+<blockquote>
+<p>Bundles 继承命令列表中设置的 root signature 绑定，如果 bundle 需要改变继承的一些绑定，那么必须先设置和命令列表同样的 root signature；如果 bundle 不需要改变任何 root signature 绑定，那么就不需要设置。</p>
+<p>bundle 执行完之后，任何绑定的变化都会被继承回命令列表。</p>
+</blockquote>
+<h1 id="创建-root-signature"><a class="markdownIt-Anchor" href="#创建-root-signature"></a> 创建 Root Signature</h1>
+<blockquote>
+<p>Root signatures 是复杂的包含嵌套的数据结构，可以在程序中定义，也可以授权给 HLSL 定义 (这样编译器可以更早验证是否和 shader 匹配)</p>
+</blockquote>
+<h2 id="descriptor-table-绑定类型"><a class="markdownIt-Anchor" href="#descriptor-table-绑定类型"></a> Descriptor Table 绑定类型</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> <span class="title">D3D12_DESCRIPTOR_RANGE_TYPE</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    D3D12_DESCRIPTOR_RANGE_TYPE_SRV,</span><br><span class="line">    D3D12_DESCRIPTOR_RANGE_TYPE_UAV,</span><br><span class="line">    D3D12_DESCRIPTOR_RANGE_TYPE_CBV,</span><br><span class="line">    D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER</span><br><span class="line">&#125; D3D12_DESCRIPTOR_RANGE_TYPE;</span><br></pre></td></tr></table></figure>
+<h2 id="descriptor-range"><a class="markdownIt-Anchor" href="#descriptor-range"></a> Descriptor Range</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_DESCRIPTOR_RANGE</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    D3D12_DESCRIPTOR_RANGE_TYPE RangeType;</span><br><span class="line">    UINT                        NumDescriptors;</span><br><span class="line">    UINT                        BaseShaderRegister;</span><br><span class="line">    UINT                        RegisterSpace;</span><br><span class="line">    UINT                        OffsetInDescriptorsFromTableStart;</span><br><span class="line">&#125; D3D12_DESCRIPTOR_RANGE;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>定义了在一个 descriptor table 中指定类型的 descriptor range</p>
+</blockquote>
+<h2 id="descriptor-table-布局"><a class="markdownIt-Anchor" href="#descriptor-table-布局"></a> Descriptor Table 布局</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_ROOT_DESCRIPTOR_TABLE</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    UINT                         NumDescriptorRanges;</span><br><span class="line">    <span class="keyword">const</span> D3D12_DESCRIPTOR_RANGE *pDescriptorRanges;</span><br><span class="line">&#125; D3D12_ROOT_DESCRIPTOR_TABLE;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> ID3D12GraphicsCommandList::SetGraphicsRootDescriptorTable</span><br><span class="line">(</span><br><span class="line">    [in] UINT                        RootParameterIndex,</span><br><span class="line">    [in] D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> ID3D12GraphicsCommandList::SetComputeRootDescriptorTable</span><br><span class="line">(</span><br><span class="line">    [in] UINT                        RootParameterIndex,</span><br><span class="line">    [in] D3D12_GPU_DESCRIPTOR_HANDLE BaseDescriptor</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h2 id="root-constants"><a class="markdownIt-Anchor" href="#root-constants"></a> Root Constants</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_ROOT_CONSTANTS</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    UINT ShaderRegister;</span><br><span class="line">    UINT RegisterSpace;</span><br><span class="line">    UINT Num32BitValues;</span><br><span class="line">&#125; D3D12_ROOT_CONSTANTS;</span><br></pre></td></tr></table></figure>
+<h2 id="root-descriptor"><a class="markdownIt-Anchor" href="#root-descriptor"></a> Root Descriptor</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_ROOT_DESCRIPTOR</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    UINT ShaderRegister;</span><br><span class="line">    UINT RegisterSpace;</span><br><span class="line">&#125; D3D12_ROOT_DESCRIPTOR;</span><br></pre></td></tr></table></figure>
+<h2 id="shader-可见性"><a class="markdownIt-Anchor" href="#shader-可见性"></a> Shader 可见性</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> <span class="title">D3D12_SHADER_VISIBILITY</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    D3D12_SHADER_VISIBILITY_ALL = <span class="number">0</span>,</span><br><span class="line">    D3D12_SHADER_VISIBILITY_VERTEX = <span class="number">1</span>,</span><br><span class="line">    D3D12_SHADER_VISIBILITY_HULL = <span class="number">2</span>,</span><br><span class="line">    D3D12_SHADER_VISIBILITY_DOMAIN = <span class="number">3</span>,</span><br><span class="line">    D3D12_SHADER_VISIBILITY_GEOMETRY = <span class="number">4</span>,</span><br><span class="line">    D3D12_SHADER_VISIBILITY_PIXEL = <span class="number">5</span>,</span><br><span class="line">    D3D12_SHADER_VISIBILITY_AMPLIFICATION = <span class="number">6</span>,</span><br><span class="line">    D3D12_SHADER_VISIBILITY_MESH = <span class="number">7</span></span><br><span class="line">&#125; ;</span><br></pre></td></tr></table></figure>
+<h2 id="root-signature-定义"><a class="markdownIt-Anchor" href="#root-signature-定义"></a> Root Signature 定义</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_ROOT_SIGNATURE_DESC</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    UINT                            NumParameters;</span><br><span class="line">    <span class="keyword">const</span> D3D12_ROOT_PARAMETER      *pParameters;</span><br><span class="line">    UINT                            NumStaticSamplers;</span><br><span class="line">    <span class="keyword">const</span> D3D12_STATIC_SAMPLER_DESC *pStaticSamplers;</span><br><span class="line">    D3D12_ROOT_SIGNATURE_FLAGS      Flags;</span><br><span class="line">&#125; D3D12_ROOT_SIGNATURE_DESC;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_ROOT_PARAMETER</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    D3D12_ROOT_PARAMETER_TYPE ParameterType;</span><br><span class="line">    <span class="class"><span class="keyword">union</span> </span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">        D3D12_ROOT_DESCRIPTOR_TABLE DescriptorTable;</span><br><span class="line">        D3D12_ROOT_CONSTANTS        Constants;</span><br><span class="line">        D3D12_ROOT_DESCRIPTOR       Descriptor;</span><br><span class="line">    &#125;;</span><br><span class="line">    D3D12_SHADER_VISIBILITY   ShaderVisibility;</span><br><span class="line">&#125; D3D12_ROOT_PARAMETER;</span><br></pre></td></tr></table></figure>
+<h2 id="root-signature-创建-api"><a class="markdownIt-Anchor" href="#root-signature-创建-api"></a> Root Signature 创建 API</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">HRESULT ID3D12Device::CreateRootSignature</span><br><span class="line">(</span><br><span class="line">    [in]  UINT       nodeMask,</span><br><span class="line">    [in]  <span class="keyword">const</span> <span class="keyword">void</span> *pBlobWithRootSignature,</span><br><span class="line">    [in]  SIZE_T     blobLengthInBytes,</span><br><span class="line">          REFIID     riid,</span><br><span class="line">    [out] <span class="keyword">void</span>       **ppvRootSignature</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h2 id="示例-3"><a class="markdownIt-Anchor" href="#示例-3"></a> 示例</h2>
+<p>显示如何创建一个带有如下格式的 root signature</p>
+<table>
+<thead>
+<tr>
+<th>Root Parameter Index</th>
+<th>Contents</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[0]</td>
+<td>Root constants: { b2 }</td>
+<td>1 CBV</td>
+</tr>
+<tr>
+<td>[1]</td>
+<td>Descriptor table: { t2 - t7，u0 - u3 }</td>
+<td>6 SRVs + 4 UAVs</td>
+</tr>
+<tr>
+<td>[2]</td>
+<td>Root CBV: { b0 }</td>
+<td>1 CBV，static data</td>
+</tr>
+<tr>
+<td>[3]</td>
+<td>Descriptor table: { s0 - s1 }</td>
+<td>2 Samplers</td>
+</tr>
+<tr>
+<td>[4]</td>
+<td>Descriptor table: { t8 - unbounded }</td>
+<td>unbounded # of SRVs, volatile descriptors</td>
+</tr>
+<tr>
+<td>[5]</td>
+<td>Descriptor table: { (t0, space1) - unbounded }</td>
+<td>unbounded # of SRVs，volatile descriptors</td>
+</tr>
+<tr>
+<td>[6]</td>
+<td>Descriptor table: { b1 }</td>
+<td>1 CBV，static data</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">CD3DX12_DESCRIPTOR_RANGE1 DescRange[<span class="number">6</span>];</span><br><span class="line"></span><br><span class="line">DescRange[<span class="number">0</span>].<span class="built_in">Init</span>(D3D12_DESCRIPTOR_RANGE_SRV,<span class="number">6</span>,<span class="number">2</span>); <span class="comment">// t2-t7</span></span><br><span class="line">DescRange[<span class="number">1</span>].<span class="built_in">Init</span>(D3D12_DESCRIPTOR_RANGE_UAV,<span class="number">4</span>,<span class="number">0</span>); <span class="comment">// u0-u3</span></span><br><span class="line">DescRange[<span class="number">2</span>].<span class="built_in">Init</span>(D3D12_DESCRIPTOR_RANGE_SAMPLER,<span class="number">2</span>,<span class="number">0</span>); <span class="comment">// s0-s1</span></span><br><span class="line">DescRange[<span class="number">3</span>].<span class="built_in">Init</span>(D3D12_DESCRIPTOR_RANGE_SRV,<span class="number">-1</span>,<span class="number">8</span>,<span class="number">0</span>,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE); <span class="comment">// t8-unbounded</span></span><br><span class="line">DescRange[<span class="number">4</span>].<span class="built_in">Init</span>(D3D12_DESCRIPTOR_RANGE_SRV,<span class="number">-1</span>,<span class="number">0</span>,<span class="number">1</span>,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE); </span><br><span class="line">                                                            <span class="comment">// (t0,space1)-unbounded</span></span><br><span class="line">DescRange[<span class="number">5</span>].<span class="built_in">Init</span>(D3D12_DESCRIPTOR_RANGE_CBV,<span class="number">1</span>,<span class="number">1</span>,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC); <span class="comment">// b1</span></span><br><span class="line"></span><br><span class="line">CD3DX12_ROOT_PARAMETER1 RP[<span class="number">7</span>];</span><br><span class="line"></span><br><span class="line">RP[<span class="number">0</span>].<span class="built_in">InitAsConstants</span>(<span class="number">3</span>,<span class="number">2</span>); <span class="comment">// 3 constants at b2</span></span><br><span class="line">RP[<span class="number">1</span>].<span class="built_in">InitAsDescriptorTable</span>(<span class="number">2</span>,&amp;DescRange[<span class="number">0</span>]); <span class="comment">// 2 ranges t2-t7 and u0-u3</span></span><br><span class="line">RP[<span class="number">2</span>].<span class="built_in">InitAsConstantBufferView</span>(<span class="number">0</span>, <span class="number">0</span>, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC); <span class="comment">// b0</span></span><br><span class="line">RP[<span class="number">3</span>].<span class="built_in">InitAsDescriptorTable</span>(<span class="number">1</span>,&amp;DescRange[<span class="number">2</span>]); <span class="comment">// s0-s1</span></span><br><span class="line">RP[<span class="number">4</span>].<span class="built_in">InitAsDescriptorTable</span>(<span class="number">1</span>,&amp;DescRange[<span class="number">3</span>]); <span class="comment">// t8-unbounded</span></span><br><span class="line">RP[<span class="number">5</span>].<span class="built_in">InitAsDescriptorTable</span>(<span class="number">1</span>,&amp;DescRange[<span class="number">4</span>]); <span class="comment">// (t0,space1)-unbounded</span></span><br><span class="line">RP[<span class="number">6</span>].<span class="built_in">InitAsDescriptorTable</span>(<span class="number">1</span>,&amp;DescRange[<span class="number">5</span>]); <span class="comment">// b1</span></span><br><span class="line"></span><br><span class="line">CD3DX12_STATIC_SAMPLER StaticSamplers[<span class="number">1</span>];</span><br><span class="line">StaticSamplers[<span class="number">0</span>].<span class="built_in">Init</span>(<span class="number">3</span>, D3D12_FILTER_ANISOTROPIC); <span class="comment">// s3</span></span><br><span class="line"><span class="function">CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC <span class="title">RootSig</span><span class="params">(<span class="number">7</span>,RP,<span class="number">1</span>,StaticSamplers)</span></span>;</span><br><span class="line">ID3DBlob* pSerializedRootSig;</span><br><span class="line"><span class="built_in">CheckHR</span>(<span class="built_in">D3D12SerializeVersionedRootSignature</span>(&amp;RootSig,pSerializedRootSig)); </span><br><span class="line"></span><br><span class="line">ID3D12RootSignature* pRootSignature;</span><br><span class="line">hr = <span class="built_in">CheckHR</span>(pDevice-&gt;<span class="built_in">CreateRootSignature</span>(</span><br><span class="line">    pSerializedRootSig-&gt;<span class="built_in">GetBufferPointer</span>(),pSerializedRootSig-&gt;<span class="built_in">GetBufferSize</span>(),</span><br><span class="line">    __uuidof(ID3D12RootSignature),</span><br><span class="line">    &amp;pRootSignature));</span><br></pre></td></tr></table></figure>
+<p>下面的代码演示在一个 graphics 命令列表中如何使用该 root signature</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">InitializeMyDescriptorHeapContentsAheadOfTime</span>(); <span class="comment">// for simplicity of the </span></span><br><span class="line">                                                 <span class="comment">// example</span></span><br><span class="line"><span class="built_in">CreatePipelineStatesAhreadOfTime</span>(pRootSignature); <span class="comment">// The root signature is passed into </span></span><br><span class="line">                                     <span class="comment">// shader / pipeline state creation</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">ID3D12DescriptorHeap* pHeaps[<span class="number">2</span>] = &#123;pCommonHeap, pSamplerHeap&#125;;</span><br><span class="line">pGraphicsCommandList-&gt;<span class="built_in">SetDescriptorHeaps</span>(<span class="number">2</span>,pHeaps);</span><br><span class="line">pGraphicsCommandList-&gt;<span class="built_in">SetGraphicsRootSignature</span>(pRootSignature);</span><br><span class="line">pGraphicsCommandList-&gt;<span class="built_in">SetGraphicsRootDescriptorTable</span>(<span class="number">6</span>,heapOffsetForMoreData,DescRange[<span class="number">5</span>].NumDescriptors);</span><br><span class="line">pGraphicsCommandList-&gt;<span class="built_in">SetGraphicsRootDescriptorTable</span>(<span class="number">5</span>,heapOffsetForMisc,<span class="number">5000</span>); </span><br><span class="line">pGraphicsCommandList-&gt;<span class="built_in">SetGraphicsRootDescriptorTable</span>(<span class="number">4</span>,heapOffsetForTerrain,<span class="number">20000</span>);</span><br><span class="line">pGraphicsCommandList-&gt;<span class="built_in">SetGraphicsRootDescriptorTable</span>(<span class="number">3</span>,heapOffsetForSamplers,DescRange[<span class="number">2</span>].NumDescriptors);</span><br><span class="line">pGraphicsCommandList-&gt;<span class="built_in">SetComputeRootConstantBufferView</span>(<span class="number">2</span>,pDynamicCBHeap,&amp;CBVDesc);</span><br><span class="line"></span><br><span class="line">MY_PER_DRAW_STUFF stuff;</span><br><span class="line"><span class="built_in">InitMyPerDrawStuff</span>(&amp;stuff);</span><br><span class="line">pGraphicsCommandList-&gt;<span class="built_in">SetSetGraphicsRoot32BitConstants</span>(<span class="number">0</span>,&amp;stuff,<span class="number">0</span>,RTSlot[<span class="number">0</span>].Constants.Num32BitValues);</span><br><span class="line"></span><br><span class="line"><span class="built_in">SetMyRTVAndOtherMiscBindings</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(UINT i = <span class="number">0</span>; i &lt; numObjects; i++)</span><br><span class="line">&#123;</span><br><span class="line">    pGraphicsCommandList-&gt;<span class="built_in">SetPipelineState</span>(PSO[i]);</span><br><span class="line">    pGraphicsCommandList-&gt;<span class="built_in">SetGraphicsRootDescriptorTable</span>(<span class="number">1</span>,heapOffsetForFooAndBar[i],DescRange[<span class="number">1</span>].NumDescriptors);</span><br><span class="line">    pGraphicsCommandList-&gt;<span class="built_in">SetGraphicsRoot32BitConstant</span>(<span class="number">0</span>,&amp;i,<span class="number">1</span>,drawIDOffset);</span><br><span class="line">    <span class="built_in">SetMyIndexBuffers</span>(i);</span><br><span class="line">    pGraphicsCommandList-&gt;<span class="built_in">DrawIndexedInstanced</span>(...);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="root-signature-限制"><a class="markdownIt-Anchor" href="#root-signature-限制"></a> Root Signature 限制</h1>
+<h2 id="内存限制和代价"><a class="markdownIt-Anchor" href="#内存限制和代价"></a> 内存限制和代价</h2>
+<blockquote>
+<p>一个 root signature 的内存限制为 64 DWORDS</p>
+<ul>
+<li>每个 descriptor table cost 1 DWORD</li>
+<li>每个 root constant cost 1 DWORD</li>
+<li>每个 root descriptor cost 2 DWORDs</li>
+</ul>
+</blockquote>
+<h2 id="性能代价"><a class="markdownIt-Anchor" href="#性能代价"></a> 性能代价</h2>
+<blockquote>
+<p>根据间接访问的次数：</p>
+<ul>
+<li>每个 root constant cost 0</li>
+<li>每个 root descriptor cost 1</li>
+<li>每个 descriptor table cost 2</li>
+</ul>
+<p>一般来说，遵循如下准则：</p>
+<ul>
+<li>使用尽可能小的 root signature，同时平衡使用更大 root signature 的灵活性</li>
+<li>在一个更大 root signature 中安排最可能变化的参数，或者需要低访问延迟的参数</li>
+<li>如果方便的话，倾向于使用 root constants 或者 root constant buffer views</li>
+</ul>
+</blockquote>
+<h2 id="static-samplers"><a class="markdownIt-Anchor" href="#static-samplers"></a> Static Samplers</h2>
+<blockquote>
+<p>Static samplers 的状态是完全定义的并且不可变的，没有内存限制和性能代价。Root signature 可以同时包含 static 和 dynamic samplers，在 descriptor heap 中的 samplers 可以被动态指定和索引。</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/07/18/dx12/guide3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -213,7 +580,16 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2022-07-18 03:02:17 / 修改时间：09:53:04" itemprop="dateCreated datePublished" datetime="2022-07-18T03:02:17+08:00">2022-07-18</time>
+      <time title="创建时间：2022-07-18 03:02:17 / 修改时间：22:56:48" itemprop="dateCreated datePublished" datetime="2022-07-18T03:02:17+08:00">2022-07-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Direct3D-12/" itemprop="url" rel="index"><span itemprop="name">Direct3D 12</span></a>
+        </span>
     </span>
 
   
@@ -243,6 +619,34 @@
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;<span class="comment">// 在一个 heap 的起始位置创建 descriptor handle </span></span><br><span class="line">&gt;ID3D12DescriptorHeap::GetCPUDescriptorHandleForHeapStart</span><br><span class="line">&gt;ID3D12DescriptorHeap::GetGPUDescriptorHandleForHeapStart</span><br><span class="line">   </span><br><span class="line">&gt;<span class="comment">// 获取在一个 heap 中每个 descriptor 之间的间隔大小</span></span><br><span class="line">&gt;ID3D12Device::GetDescriptorHandleIncrementSize</span><br></pre></td></tr></table></figure>
 </blockquote>
 <h2 id="null-descriptors"><a class="markdownIt-Anchor" href="#null-descriptors"></a> Null descriptors</h2>
+<blockquote>
+<p>在创建 view 时例如 CreateShaderResourceView，如果传递 null 给 pResource 参数，则会创建一个 null descriptor；对于 pDesc 参数需要设置一个可用的配置，不然在某些硬件上可能会崩溃。</p>
+<p>Root descriptors 不应该被设置为 null</p>
+</blockquote>
+<h2 id="default-descriptors"><a class="markdownIt-Anchor" href="#default-descriptors"></a> Default descriptors</h2>
+<blockquote>
+<p>在创建 view 时例如 CreateShaderResourceView，传递一个有效的 pResource 参数，并且传递 null 给 pDesc 参数，则会创建一个 default descriptor。</p>
+<p>不能创建 default descriptors 用于 raytracing acceleration structure view</p>
+</blockquote>
+<h1 id="创建-descriptors"><a class="markdownIt-Anchor" href="#创建-descriptors"></a> 创建 descriptors</h1>
+<h2 id="render-target-view"><a class="markdownIt-Anchor" href="#render-target-view"></a> Render target view</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_RENDER_TARGET_VIEW_DESC</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    DXGI_FORMAT Format;</span><br><span class="line">    D3D12_RTV_DIMENSION ViewDimension;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">union</span></span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">        D3D12_BUFFER_RTV Buffer;</span><br><span class="line">        D3D12_TEX1D_RTV Texture1D;</span><br><span class="line">        D3D12_TEX1D_ARRAY_RTV Texture1DArray;</span><br><span class="line">        D3D12_TEX2D_RTV Texture2D;</span><br><span class="line">        D3D12_TEX2D_ARRAY_RTV Texture2DArray;</span><br><span class="line">        D3D12_TEX2DMS_RTV Texture2DMS;</span><br><span class="line">        D3D12_TEX2DMS_ARRAY_RTV Texture2DMSArray;</span><br><span class="line">        D3D12_TEX3D_RTV Texture3D;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125; D3D12_RENDER_TARGET_VIEW_DESC;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12Device::CreateRenderTargetView</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] ID3D12Resource                      *pResource,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] <span class="keyword">const</span> D3D12_RENDER_TARGET_VIEW_DESC *pDesc,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           D3D12_CPU_DESCRIPTOR_HANDLE         DestDescriptor</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="depth-stencil-view"><a class="markdownIt-Anchor" href="#depth-stencil-view"></a> Depth stencil view</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_DEPTH_STENCIL_VIEW_DESC</span>  </span></span><br><span class="line"><span class="class">&#123;</span>  </span><br><span class="line">    DXGI_FORMAT Format;  </span><br><span class="line">    D3D12_DSV_DIMENSION ViewDimension;  </span><br><span class="line">    D3D12_DSV_FLAGS Flags;  </span><br><span class="line">    <span class="class"><span class="keyword">union</span>   </span></span><br><span class="line"><span class="class">    &#123;</span>  </span><br><span class="line">        D3D12_TEX1D_DSV Texture1D;  </span><br><span class="line">        D3D12_TEX1D_ARRAY_DSV Texture1DArray;  </span><br><span class="line">        D3D12_TEX2D_DSV Texture2D;  </span><br><span class="line">        D3D12_TEX2D_ARRAY_DSV Texture2DArray;  </span><br><span class="line">        D3D12_TEX2DMS_DSV Texture2DMS;  </span><br><span class="line">        D3D12_TEX2DMS_ARRAY_DSV Texture2DMSArray;  </span><br><span class="line">    &#125;;  </span><br><span class="line">&#125; D3D12_DEPTH_STENCIL_VIEW_DESC;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12Device::CreateDepthStencilView</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] ID3D12Resource                      *pResource,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] <span class="keyword">const</span> D3D12_DEPTH_STENCIL_VIEW_DESC *pDesc,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           D3D12_CPU_DESCRIPTOR_HANDLE         DestDescriptor</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="vertex-buffer-view"><a class="markdownIt-Anchor" href="#vertex-buffer-view"></a> Vertex buffer view</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_VERTEX_BUFFER_VIEW</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    D3D12_GPU_VIRTUAL_ADDRESS BufferLocation;  </span><br><span class="line">    UINT SizeInBytes;  </span><br><span class="line">    UINT StrideInBytes;  </span><br><span class="line">&#125; D3D12_VERTEX_BUFFER_VIEW;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12GraphicsCommandList::IASetVertexBuffers</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           UINT                           StartSlot,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           UINT                           NumViews,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] <span class="keyword">const</span> D3D12_VERTEX_BUFFER_VIEW *pViews</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="index-buffer-view"><a class="markdownIt-Anchor" href="#index-buffer-view"></a> Index buffer view</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_INDEX_BUFFER_VIEW</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    D3D12_GPU_VIRTUAL_ADDRESS BufferLocation;</span><br><span class="line">    UINT SizeInBytes;</span><br><span class="line">    DXGI_FORMAT Format;</span><br><span class="line">&#125; D3D12_INDEX_BUFFER_VIEW;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12GraphicsCommandList::IASetIndexBuffer</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] <span class="keyword">const</span> D3D12_INDEX_BUFFER_VIEW *pView</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="shader-resource-view"><a class="markdownIt-Anchor" href="#shader-resource-view"></a> Shader resource view</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_SHADER_RESOURCE_VIEW_DESC</span>  </span></span><br><span class="line"><span class="class">&#123;</span>  </span><br><span class="line">    DXGI_FORMAT Format;  </span><br><span class="line">    D3D12_SRV_DIMENSION ViewDimension;  </span><br><span class="line">    UINT Shader4ComponentMapping;  </span><br><span class="line">    <span class="class"><span class="keyword">union</span>   </span></span><br><span class="line"><span class="class">    &#123;</span>  </span><br><span class="line">        D3D12_BUFFER_SRV Buffer;  </span><br><span class="line">        D3D12_TEX1D_SRV Texture1D;  </span><br><span class="line">        D3D12_TEX1D_ARRAY_SRV Texture1DArray;  </span><br><span class="line">        D3D12_TEX2D_SRV Texture2D;  </span><br><span class="line">        D3D12_TEX2D_ARRAY_SRV Texture2DArray;  </span><br><span class="line">        D3D12_TEX2DMS_SRV Texture2DMS;  </span><br><span class="line">        D3D12_TEX2DMS_ARRAY_SRV Texture2DMSArray;  </span><br><span class="line">        D3D12_TEX3D_SRV Texture3D;  </span><br><span class="line">        D3D12_TEXCUBE_SRV TextureCube;  </span><br><span class="line">        D3D12_TEXCUBE_ARRAY_SRV TextureCubeArray;  </span><br><span class="line">    &#125;;  </span><br><span class="line">&#125; D3D12_SHADER_RESOURCE_VIEW_DESC;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12Device::CreateShaderResourceView</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] ID3D12Resource                        *pResource,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] <span class="keyword">const</span> D3D12_SHADER_RESOURCE_VIEW_DESC *pDesc,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           D3D12_CPU_DESCRIPTOR_HANDLE           DestDescriptor</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="constant-buffer-view"><a class="markdownIt-Anchor" href="#constant-buffer-view"></a> Constant buffer view</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_CONSTANT_BUFFER_VIEW_DESC</span> </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  D3D12_GPU_VIRTUAL_ADDRESS BufferLocation;</span><br><span class="line">  UINT   SizeInBytes;</span><br><span class="line">&#125; D3D12_CONSTANT_BUFFER_VIEW_DESC;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12Device::CreateConstantBufferView</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] <span class="keyword">const</span> D3D12_CONSTANT_BUFFER_VIEW_DESC *pDesc,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           D3D12_CPU_DESCRIPTOR_HANDLE           DestDescriptor</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="sampler"><a class="markdownIt-Anchor" href="#sampler"></a> Sampler</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_SAMPLER_DESC</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    D3D12_FILTER Filter;</span><br><span class="line">    D3D12_TEXTURE_ADDRESS_MODE AddressU;</span><br><span class="line">    D3D12_TEXTURE_ADDRESS_MODE AddressV;</span><br><span class="line">    D3D12_TEXTURE_ADDRESS_MODE AddressW;</span><br><span class="line">    FLOAT MipLODBias;</span><br><span class="line">    UINT MaxAnisotropy;</span><br><span class="line">    D3D12_COMPARISON_FUNC ComparisonFunc;</span><br><span class="line">    FLOAT BorderColor[<span class="number">4</span>]; <span class="comment">// RGBA</span></span><br><span class="line">    FLOAT MinLOD;</span><br><span class="line">    FLOAT MaxLOD;</span><br><span class="line">&#125; D3D12_SAMPLER_DESC;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12Device::CreateSampler</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in] <span class="keyword">const</span> D3D12_SAMPLER_DESC    *pDesc,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in] D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="unordered-access-view"><a class="markdownIt-Anchor" href="#unordered-access-view"></a> Unordered access view</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_UNORDERED_ACCESS_VIEW_DESC</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    DXGI_FORMAT Format;</span><br><span class="line">    D3D12_UAV_DIMENSION ViewDimension;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">union</span></span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">        D3D12_BUFFER_UAV Buffer;</span><br><span class="line">        D3D12_TEX1D_UAV Texture1D;</span><br><span class="line">        D3D12_TEX1D_ARRAY_UAV Texture1DArray;</span><br><span class="line">        D3D12_TEX2D_UAV Texture2D;</span><br><span class="line">        D3D12_TEX2D_ARRAY_UAV Texture2DArray;</span><br><span class="line">        D3D12_TEX3D_UAV Texture3D;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125; D3D12_UNORDERED_ACCESS_VIEW_DESC;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12Device::CreateUnorderedAccessView</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">       ID3D12Resource                         *pResource,</span></span></span><br><span class="line"><span class="function"><span class="params">       ID3D12Resource                         *pCounterResource,</span></span></span><br><span class="line"><span class="function"><span class="params">       <span class="keyword">const</span> D3D12_UNORDERED_ACCESS_VIEW_DESC *pDesc,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in] D3D12_CPU_DESCRIPTOR_HANDLE            DestDescriptor</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="stream-output-view"><a class="markdownIt-Anchor" href="#stream-output-view"></a> Stream output view</h2>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">D3D12_STREAM_OUTPUT_DESC</span>  </span></span><br><span class="line"><span class="class">&#123;</span>  </span><br><span class="line">    _Field_size_full_(NumEntries)  <span class="keyword">const</span> D3D12_SO_DECLARATION_ENTRY *pSODeclaration;  </span><br><span class="line">    UINT NumEntries;  </span><br><span class="line">    _Field_size_full_(NumStrides)  <span class="keyword">const</span> UINT *pBufferStrides;  </span><br><span class="line">    UINT NumStrides;  </span><br><span class="line">    UINT RasterizedStream;  </span><br><span class="line">&#125; D3D12_STREAM_OUTPUT_DESC;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ID3D12GraphicsCommandList::SOSetTargets</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           UINT                                  StartSlot,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in]           UINT                                  NumViews,</span></span></span><br><span class="line"><span class="function"><span class="params">  [in, optional] <span class="keyword">const</span> D3D12_STREAM_OUTPUT_BUFFER_VIEW *pViews</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -2108,184 +2512,6 @@ s76,-59,76,-59s76,-60,76,-60z M1001 80H40000v40H1012z'/></svg></span></span></sp
 <h3 id="渲染方程"><a class="markdownIt-Anchor" href="#渲染方程"></a> 渲染方程</h3>
 <p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>L</mi><mi>o</mi></msub><mo stretchy="false">(</mo><mi>p</mi><mo separator="true">,</mo><msub><mi>ω</mi><mi>o</mi></msub><mo stretchy="false">)</mo><mo>=</mo><msub><mi>L</mi><mi>e</mi></msub><mo stretchy="false">(</mo><mi>p</mi><mo separator="true">,</mo><msub><mi>ω</mi><mi>o</mi></msub><mo stretchy="false">)</mo><mo>+</mo><msub><mo>∫</mo><msup><mi mathvariant="script">S</mi><mn>2</mn></msup></msub><mi>f</mi><mo stretchy="false">(</mo><mi>p</mi><mo separator="true">,</mo><msub><mi>ω</mi><mi>o</mi></msub><mo separator="true">,</mo><msub><mi>ω</mi><mi>i</mi></msub><mo stretchy="false">)</mo><msub><mi>L</mi><mi>i</mi></msub><mo stretchy="false">(</mo><mi>p</mi><mo separator="true">,</mo><msub><mi>ω</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mi mathvariant="normal">∣</mi><mi>c</mi><mi>o</mi><mi>s</mi><msub><mi>θ</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><mi>d</mi><msub><mi>ω</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">L_o(p,\omega_o) = L_e(p,\omega_o)+\int_{\mathcal{S}^2}f(p,\omega_o,\omega_i)L_i(p,\omega_i)|cos\theta_i|d\omega_i
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">e</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:2.27195em;vertical-align:-0.9119499999999999em;"></span><span class="mop"><span class="mop op-symbol large-op" style="margin-right:0.44445em;position:relative;top:-0.0011249999999999316em;">∫</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:-0.38952999999999993em;"><span style="top:-1.7880500000000001em;margin-left:-0.44445em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathcal mtight" style="margin-right:0.075em;">S</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7463142857142857em;"><span style="top:-2.786em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9119499999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mord"><span class="mord mathdefault">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mord">∣</span><span class="mord mathdefault">c</span><span class="mord mathdefault">o</span><span class="mord mathdefault">s</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02778em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mord mathdefault">d</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://beizi-blog.cn/2022/04/24/pbr/pbrmat1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="被子">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="被子的博客">
-      <meta itemprop="description" content="描述">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 被子的博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/04/24/pbr/pbrmat1/" class="post-title-link" itemprop="url">PBR 材质基础 一 · 定义</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-04-24 21:57:19" itemprop="dateCreated datePublished" datetime="2022-04-24T21:57:19+08:00">2022-04-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-05-22 21:28:00" itemprop="dateModified" datetime="2022-05-22T21:28:00+08:00">2022-05-22</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PBR/" itemprop="url" rel="index"><span itemprop="name">PBR</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <blockquote>
-<p>参考： Physically Based Rendering Chapter 5</p>
-</blockquote>
-<h1 id="辐射度量学-radiometry"><a class="markdownIt-Anchor" href="#辐射度量学-radiometry"></a> 辐射度量学 ( Radiometry )</h1>
-<blockquote>
-<p>辐射度量学提供了一组思想和数学工具来描述光的传播和反射，它是学习 PBR 材质和推导渲染算法的基础。一般情况下，几何光学就足以描述光如何与其他物体相互作用，而当物体对象与光的波长差不多时，就需要使用波动光学来实现一些特殊的现象（色散、干预等）。游戏中大部分情况下使用几何光学就足够了，并且假定满足以下这些条件：</p>
-</blockquote>
-<ul>
-<li><strong>线性</strong>：L(A + B) = L(A) + L(B)，A 和 B 表示两个不同的输入光，L 表示给定输入光的情况下的输出</li>
-<li><strong>能量守恒</strong>：L(A) <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>≤</mo></mrow><annotation encoding="application/x-tex">\le</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719400000000001em;vertical-align:-0.13597em;"></span><span class="mrel">≤</span></span></span></span> A</li>
-<li><strong>无偏振光</strong>：只考虑光的波长属性</li>
-<li><strong>无荧光或磷光</strong>：不同波长的光的行为彼此之间完全独立</li>
-<li><strong>稳定状态</strong>：环境中的光达到了平衡，辐射分布保持不变</li>
-</ul>
-<h2 id="基本度量单位"><a class="markdownIt-Anchor" href="#基本度量单位"></a> 基本度量单位</h2>
-<h3 id="辐射能量-energy"><a class="markdownIt-Anchor" href="#辐射能量-energy"></a> 辐射能量  ( Energy )</h3>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>Q</mi><mo>=</mo><mfrac><mrow><mi>h</mi><mi>c</mi></mrow><mi>λ</mi></mfrac></mrow><annotation encoding="application/x-tex">Q = \frac{hc}{\lambda}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">Q</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.05744em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.37144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">λ</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">h</span><span class="mord mathdefault">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
-<h3 id="辐射通量-radiant-flux"><a class="markdownIt-Anchor" href="#辐射通量-radiant-flux"></a> 辐射通量  ( Radiant Flux )</h3>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Φ</mi><mo>=</mo><munder><mo><mi>lim</mi><mo>⁡</mo></mo><mrow><mi mathvariant="normal">Δ</mi><mi>t</mi><mo>→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi mathvariant="normal">Δ</mi><mi>Q</mi></mrow><mrow><mi mathvariant="normal">Δ</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mi>d</mi><mi>Q</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\Phi = \lim_{\Delta t \to 0}\frac{\Delta Q}{\Delta t} = \frac{dQ}{dt}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">Φ</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.1046609999999997em;vertical-align:-0.744331em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-2.055669em;margin-left:0em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">Δ</span><span class="mord mathdefault mtight">t</span><span class="mrel mtight">→</span><span class="mord mtight">0</span></span></span></span><span style="top:-2.7em;"><span class="pstrut" style="height:2.7em;"></span><span><span class="mop">lim</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.744331em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603299999999998em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathdefault">t</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathdefault">Q</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.0574399999999997em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714399999999998em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault">t</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault">Q</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
- <br/>
-<p><img src="/images/pbr/flux.jpg" alt="" /></p>
-<br/>
-<h3 id="辐照度-辐射出射度-irradiance-radiant-exitance"><a class="markdownIt-Anchor" href="#辐照度-辐射出射度-irradiance-radiant-exitance"></a> 辐照度 / 辐射出射度 ( Irradiance / Radiant Exitance)</h3>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>E</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo><mo>=</mo><munder><mo><mi>lim</mi><mo>⁡</mo></mo><mrow><mi mathvariant="normal">Δ</mi><mi>A</mi><mo>→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi mathvariant="normal">Δ</mi><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo></mrow><mrow><mi mathvariant="normal">Δ</mi><mi>A</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mi>d</mi><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo></mrow><mrow><mi>d</mi><mi>A</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">E(p) = \lim_{\Delta A \to 0} \frac{\Delta \Phi(p)}{\Delta A} = \frac{d\Phi(p)}{dA}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.171331em;vertical-align:-0.744331em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-2.055669em;margin-left:0em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">Δ</span><span class="mord mathdefault mtight">A</span><span class="mrel mtight">→</span><span class="mord mtight">0</span></span></span></span><span style="top:-2.7em;"><span class="pstrut" style="height:2.7em;"></span><span><span class="mop">lim</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.744331em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathdefault">A</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.113em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault">A</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
-<br/>
-<p><img src="/images/pbr/lambert.jpg" alt="" /></p>
-<br/>
-<p><strong>Lambert’s Law</strong></p>
-<p class='katex-block katex-error' title='ParseError: KaTeX parse error: No such environment: align at position 7: \begin{̲a̲l̲i̲g̲n̲}̲
-E_1 &amp;= \frac{\…'>\begin{align}
-E_1 &amp;= \frac{\Phi}{A_1} = \frac{\Phi}{A} \\
-E_2 &amp;= \frac{\Phi}{A_2} = \frac{\Phi}{A/cos\theta} = \frac{\Phi cos\theta}{A}
-\end{align}
-</p>
-<h3 id="辐射强度-radiant-intensity"><a class="markdownIt-Anchor" href="#辐射强度-radiant-intensity"></a> 辐射强度 ( Radiant Intensity )</h3>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>I</mi><mo>=</mo><munder><mo><mi>lim</mi><mo>⁡</mo></mo><mrow><mi mathvariant="normal">Δ</mi><mi>ω</mi><mo>→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi mathvariant="normal">Δ</mi><mi mathvariant="normal">Φ</mi></mrow><mrow><mi mathvariant="normal">Δ</mi><mi>ω</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mi>d</mi><mi mathvariant="normal">Φ</mi></mrow><mrow><mi>d</mi><mi>ω</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">I = \lim_{\Delta\omega\to 0} \frac{\Delta\Phi}{\Delta\omega} = \frac{d\Phi}{d\omega}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.104661em;vertical-align:-0.744331em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-2.055669em;margin-left:0em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">Δ</span><span class="mord mathdefault mtight" style="margin-right:0.03588em;">ω</span><span class="mrel mtight">→</span><span class="mord mtight">0</span></span></span></span><span style="top:-2.7em;"><span class="pstrut" style="height:2.7em;"></span><span><span class="mop">lim</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.744331em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.36033em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord">Φ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.05744em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.37144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord">Φ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
-<br/>
-<p><img src="/images/pbr/solid_angle.jpg" alt="" /></p>
-<br/>
-<h3 id="辐射率-radiance"><a class="markdownIt-Anchor" href="#辐射率-radiance"></a> 辐射率 ( Radiance )</h3>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>L</mi><mo stretchy="false">(</mo><mi>p</mi><mo separator="true">,</mo><mi>ω</mi><mo stretchy="false">)</mo><mo>=</mo><munder><mo><mi>lim</mi><mo>⁡</mo></mo><mrow><mi mathvariant="normal">Δ</mi><mi>ω</mi><mo>→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi mathvariant="normal">Δ</mi><msub><mi>E</mi><mi>ω</mi></msub><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo></mrow><mrow><mi mathvariant="normal">Δ</mi><mi>ω</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mi>d</mi><msub><mi>E</mi><mi>ω</mi></msub><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo></mrow><mrow><mi>d</mi><mi>ω</mi></mrow></mfrac><mo>=</mo><mfrac><mrow><mi>d</mi><mi mathvariant="normal">Φ</mi></mrow><mrow><mi>d</mi><mi>ω</mi><mi>d</mi><msup><mi>A</mi><mo>⊥</mo></msup></mrow></mfrac></mrow><annotation encoding="application/x-tex">L(p,\omega) = \lim_{\Delta \omega \to 0}\frac{\Delta E_\omega(p)}{\Delta \omega} = \frac{dE_\omega(p)}{d\omega} = \frac{d\Phi}{d\omega dA^{\perp}}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">L</span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.171331em;vertical-align:-0.744331em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-2.055669em;margin-left:0em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">Δ</span><span class="mord mathdefault mtight" style="margin-right:0.03588em;">ω</span><span class="mrel mtight">→</span><span class="mord mtight">0</span></span></span></span><span style="top:-2.7em;"><span class="pstrut" style="height:2.7em;"></span><span><span class="mop">lim</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.744331em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.05764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.03588em;">ω</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.113em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.05764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.03588em;">ω</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.05744em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.37144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span><span class="mord mathdefault">d</span><span class="mord"><span class="mord mathdefault">A</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7751079999999999em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mrel mtight">⊥</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord">Φ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
-<blockquote>
-<p>辐射率是非常重要的一个度量单位，这是因为</p>
-<ol>
-<li>知道了辐射率，其他所有的度量单位都可以通过积分计算出来</li>
-<li>光线沿着某一方向传播的过程中辐射率保持不变</li>
-</ol>
-</blockquote>
-<br/>
-<h1 id="光度学"><a class="markdownIt-Anchor" href="#光度学"></a> 光度学</h1>
-<blockquote>
-<p>光度学是研究人类视觉系统对于可见光辐射的感知程度，每一个辐射度量单位都有对应的光度度量单位，可以通过对光谱响应曲线 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><mi>λ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(\lambda)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mopen">(</span><span class="mord mathdefault">λ</span><span class="mclose">)</span></span></span></span> 进行积分计算出来</p>
-</blockquote>
-<h2 id="基本度量单位-2"><a class="markdownIt-Anchor" href="#基本度量单位-2"></a> 基本度量单位</h2>
-<h3 id="光能-luminous-energy"><a class="markdownIt-Anchor" href="#光能-luminous-energy"></a> 光能 ( Luminous Energy )</h3>
-<blockquote>
-<p>单位是 talbot (T)，对应于辐射能量</p>
-</blockquote>
-<h3 id="光通量-luminous-flux"><a class="markdownIt-Anchor" href="#光通量-luminous-flux"></a> 光通量 ( Luminous Flux )</h3>
-<blockquote>
-<p>单位时间内由光源所发出的总光能，单位 (流明 lm)，对应于辐射通量</p>
-</blockquote>
-<h3 id="照度-光出射度-illuminance-luminous-exitance"><a class="markdownIt-Anchor" href="#照度-光出射度-illuminance-luminous-exitance"></a> 照度 / 光出射度 ( Illuminance / Luminous Exitance )</h3>
-<blockquote>
-<p>物体表面单位面积所吸收 /  发出的光通量，单位 (勒克斯 lux)，对应于辐照度 / 辐射出射度</p>
-</blockquote>
-<h3 id="发光强度-luminous-intensity"><a class="markdownIt-Anchor" href="#发光强度-luminous-intensity"></a> 发光强度 ( Luminous Intensity )</h3>
-<blockquote>
-<p>光源在给定方向上，每单位立体角内所发出的光通量，单位 (坎德拉 cd)，对应于辐射强度</p>
-</blockquote>
-<h3 id="亮度-luminance"><a class="markdownIt-Anchor" href="#亮度-luminance"></a> 亮度 ( Luminance )</h3>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>Y</mi><mo>=</mo><msub><mo>∫</mo><mi>λ</mi></msub><mi>L</mi><mo stretchy="false">(</mo><mi>λ</mi><mo stretchy="false">)</mo><mi>V</mi><mo stretchy="false">(</mo><mi>λ</mi><mo stretchy="false">)</mo><mi>d</mi><mi>λ</mi></mrow><annotation encoding="application/x-tex">Y = \int_\lambda L(\lambda)V(\lambda)d\lambda
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.27195em;vertical-align:-0.9119499999999999em;"></span><span class="mop"><span class="mop op-symbol large-op" style="margin-right:0.44445em;position:relative;top:-0.0011249999999999316em;">∫</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:-0.425842em;"><span style="top:-1.7880500000000001em;margin-left:-0.44445em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">λ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9119499999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">L</span><span class="mopen">(</span><span class="mord mathdefault">λ</span><span class="mclose">)</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mopen">(</span><span class="mord mathdefault">λ</span><span class="mclose">)</span><span class="mord mathdefault">d</span><span class="mord mathdefault">λ</span></span></span></span></span></p>
-<blockquote>
-<p>单位面积光源在给定方向上，每单位立体角内所发出的光通量，单位 (尼特 nit)，对应于辐射率</p>
-</blockquote>
-<h1 id="基本积分公式"><a class="markdownIt-Anchor" href="#基本积分公式"></a> 基本积分公式</h1>
-<h4 id="在某一点-p-上的总辐照度"><a class="markdownIt-Anchor" href="#在某一点-p-上的总辐照度"></a> 在某一点 p 上的总辐照度：</h4>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>E</mi><mo stretchy="false">(</mo><mi>p</mi><mo separator="true">,</mo><mi>n</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mo>∫</mo><mi mathvariant="normal">Ω</mi></msub><msub><mi>L</mi><mi>i</mi></msub><mo stretchy="false">(</mo><mi>p</mi><mo separator="true">,</mo><mi>ω</mi><mo stretchy="false">)</mo><mi mathvariant="normal">∣</mi><mi>c</mi><mi>o</mi><mi>s</mi><mi>θ</mi><mi mathvariant="normal">∣</mi><mi>d</mi><mi>ω</mi></mrow><annotation encoding="application/x-tex">E(p, n) = \int_{\Omega} L_i(p, \omega)|cos\theta|d\omega
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.27195em;vertical-align:-0.9119499999999999em;"></span><span class="mop"><span class="mop op-symbol large-op" style="margin-right:0.44445em;position:relative;top:-0.0011249999999999316em;">∫</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:-0.433619em;"><span style="top:-1.7880500000000001em;margin-left:-0.44445em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">Ω</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9119499999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span><span class="mclose">)</span><span class="mord">∣</span><span class="mord mathdefault">c</span><span class="mord mathdefault">o</span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">θ</span><span class="mord">∣</span><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span></span></span></p>
-<br/>
-<p><img src="/images/pbr/irradiance_at_p.jpg" alt="" /></p>
-<br/>
-<h4 id="在某一个点-p-上的总辐照度-球面坐标"><a class="markdownIt-Anchor" href="#在某一个点-p-上的总辐照度-球面坐标"></a> 在某一个点 p 上的总辐照度 (球面坐标)：</h4>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>E</mi><mo stretchy="false">(</mo><mi>p</mi><mo separator="true">,</mo><mi>n</mi><mo stretchy="false">)</mo><mo>=</mo><msubsup><mo>∫</mo><mn>0</mn><mrow><mn>2</mn><mi>π</mi></mrow></msubsup><msubsup><mo>∫</mo><mn>0</mn><mrow><mi>π</mi><mi mathvariant="normal">/</mi><mn>2</mn></mrow></msubsup><msub><mi>L</mi><mi>i</mi></msub><mo stretchy="false">(</mo><mi>p</mi><mo separator="true">,</mo><mi>θ</mi><mo separator="true">,</mo><mi>ϕ</mi><mo stretchy="false">)</mo><mi mathvariant="normal">∣</mi><mi>c</mi><mi>o</mi><mi>s</mi><mi>θ</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mi>i</mi><mi>n</mi><mi>θ</mi><mi>d</mi><mi>θ</mi><mi>d</mi><mi>ϕ</mi></mrow><annotation encoding="application/x-tex">E(p,n) = \int_0^{2\pi}\int_0^{\pi/2}L_i(p,\theta,\phi)|cos\theta| sin\theta d\theta d\phi
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.54985em;vertical-align:-0.9119499999999999em;"></span><span class="mop"><span class="mop op-symbol large-op" style="margin-right:0.44445em;position:relative;top:-0.0011249999999999316em;">∫</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.5640080000000003em;"><span style="top:-1.7880500000000001em;margin-left:-0.44445em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span><span style="top:-3.8129000000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="mord mathdefault mtight" style="margin-right:0.03588em;">π</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9119499999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop"><span class="mop op-symbol large-op" style="margin-right:0.44445em;position:relative;top:-0.0011249999999999316em;">∫</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.6379000000000004em;"><span style="top:-1.7880500000000001em;margin-left:-0.44445em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span><span style="top:-3.8129000000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight" style="margin-right:0.03588em;">π</span><span class="mord mtight">/</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9119499999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">θ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">ϕ</span><span class="mclose">)</span><span class="mord">∣</span><span class="mord mathdefault">c</span><span class="mord mathdefault">o</span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">θ</span><span class="mord">∣</span><span class="mord mathdefault">s</span><span class="mord mathdefault">i</span><span class="mord mathdefault">n</span><span class="mord mathdefault" style="margin-right:0.02778em;">θ</span><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.02778em;">θ</span><span class="mord mathdefault">d</span><span class="mord mathdefault">ϕ</span></span></span></span></span></p>
-<br/>
-<p><img src="/images/pbr/irradiance_at_p2.jpg" alt="" /></p>
-<br/>
 
       
     </div>
