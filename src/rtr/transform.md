@@ -489,3 +489,18 @@ $$
 ::: info
 经过投影变换后，从相机坐标空间转换为 [NDC](## "Normalized Device Coordinates") 坐标空间
 :::
+
+## 视口变换
+::: tip
+视口变换的目标是将 xy 坐标从 [-1, 1] x [-1, 1] 变换到 [0, width] x [0, height]，z 坐标保持不变
+:::
+
+$$
+M_{viewport} =
+\begin{pmatrix}
+\frac{width}{2} & 0 & 0 & \frac{width}{2} \\[3px]
+0 & \frac{height}{2} & 0 & \frac{height}{2} \\[3px]
+0 & 0 & 1 & 0 \\[3px]
+0 & 0 & 0 & 1
+\end{pmatrix}
+$$
