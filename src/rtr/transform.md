@@ -140,6 +140,20 @@ $$
 \end{pmatrix}
 $$
 
+### 法线变换
+记 n 和 t 为变换前的法线和切线，n' 和 t' 为变换后的法线和切线，M 为顶点变换矩阵，S 为法线变换矩阵
+$$
+\begin{aligned}
+n'^T t' = (Sn)^T(Mt) = n^T S^TMt = 0 = n^T t
+\end{aligned}
+$$
+则
+$$
+S^T M = I \Rightarrow S = (M^{-1})^T
+$$
+
+当 M 只包含旋转和统一缩放变换时，S = M
+
 ## 视图变换
 ![](/rtr/images/transform_3.png)
 > 如图，假定相机位置在 **c**，单位向量 **r**，**u**，**v** 表示相机的旋转朝向
