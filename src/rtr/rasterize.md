@@ -27,6 +27,17 @@ tag:
 # copyright: 无版权
 ---
 
+## 光栅化线段 (Bresenhan Line Algorithm)
+![](/rtr/images/rasterize_5.png)
+![](/rtr/images/rasterize_4.png)
+
+::: tip 规则
+[diamond-exit rule](https://registry.khronos.org/OpenGL/specs/gl/glspec33.core.pdf#page=126&zoom=100,168,674)
+
+对于每一个像素点，如果线段和该像素点内的钻石区域相交并且==从该区域内穿出即（exit）==，则着色该像素点； 因此如果线段终点在像素钻石区域内，但没有穿出的话，那么也不着色该像素点，这样保证当有两段连续的线段连接在一起的时候，连接处的像素点只会绘制一次。
+:::
+
+
 ## 光栅化三角形
 <div style="text-align: center;">
 <img src="/rtr/images/rasterize_1.png" width="300" height="300"/>
