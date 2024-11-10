@@ -65,3 +65,15 @@ $$
 (d_x,d_y) = \left(log_2\sqrt{L_x^2}, log_2\sqrt{L_y^2}\right)
 $$
 通过 d~x~ 和 d~y~ 找到对应的贴图
+
+## Bump Mapping
+### 高度贴图
+![](/rtr/images/texture_6.png)
+![](/rtr/images/texture_7.png)
+
+::: tip
+通过高度图计算出 dh/du 和 dh/dv 从而扰动法线的方向
+:::
+
+### 法线贴图
+![](/rtr/images/texture_8.png)
