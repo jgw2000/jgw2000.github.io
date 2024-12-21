@@ -8,10 +8,10 @@ heroText: 你博客的名称
 heroFullScreen: true
 tagline: 你可以在这里放置你的口号与标语
 projects:
-  - icon: project
-    name: 项目名称
-    desc: 项目详细描述
-    link: https://你的项目链接
+  - icon: link
+    name: GAMES 101 项目
+    desc: 现代计算机图形学入门
+    link: https://github.com/jgw2000/Games101
 
   - icon: link
     name: 链接名称
