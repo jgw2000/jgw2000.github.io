@@ -33,7 +33,7 @@ export default hopeTheme({
 
   fullscreen: true,
 
-  darkmode: "off",
+  darkmode: "disable",
 
   // 页面元数据
   editLink: false,
