@@ -5,6 +5,7 @@ export default navbar([
   "/clrs/",
   "/rtr/",
   "/cuda/",
+  "/pbrt/",
   {
     text: "V2 文档",
     icon: "book",

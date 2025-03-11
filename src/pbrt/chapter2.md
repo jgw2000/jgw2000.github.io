@@ -77,7 +77,7 @@ $$
 $$
 \beta = E[F] - \int f(x) dx
 $$
-如果有偏估计能够比无偏估计更快的收敛到正确的结果，那么有偏估计任然是可取的
+如果有偏估计能够比无偏估计更快的收敛到正确的结果，那么有偏估计仍然是可取的
 :::
 
 :::tip 均方差
@@ -92,11 +92,11 @@ $$
 :::
 
 :::tip 样本方差
-随机采样一组独立的随机变量 $X_i$，均值 $\bar{X} = (1/n) \sum X_i$, 则采样方差等于
+随机采样一组独立的随机变量 $X_i$，样本均值 $\bar{X} = (1/n) \sum X_i$, 则样本方差等于
 $$
 S = \frac{1}{n-1} \sum_{i=1}^n (X_i - \bar{X})^2
 $$
-采样方差可以理解为对样本总体方差的一个无偏估计
+样本方差可以理解为对样本总体方差的一个无偏估计
 :::
 
 ## 提升蒙特卡洛估计效率
@@ -109,6 +109,17 @@ $
 ，我们根据概率 $p_i$ 从每一个 $\Lambda_i$ 中随机抽取 $n_i$ 个样本，则在 $\Lambda_i$ 内的蒙特卡洛估计值等于
 $$
 F_i = \frac{1}{n_i} \sum_{j=1}^{n_i} \frac{f(X_{i,j})}{p_i(X_{i,j})}
+$$
+整体估计
+$$
+\begin{aligned}
+F &= \frac{1}{m} \sum_{i=1}^m \frac{f(X_i)}{p(X_i)} = \frac{1}{m} \sum_{i=1}^n \sum_{j=1}^{n_i} \frac{f(X_{i,j})}{p_i(X_{i,j})} \\
+&= \frac{n_i}{m} \sum_{i=1}^n \frac{1}{n_i} \sum_{j=1}^{n_i} \frac{f(X_{i,j})}{p_i(X_{i,j})} \\
+&= \frac{n_i}{m} \sum_{i=1}^n F_i \\
+&= \sum_{i=1}^n v_i F_i
+\end{aligned}
+
+其中 \, v_i \, 表示第 \, i \, 个区域所占的比例
 $$
 :::
 
@@ -126,8 +137,8 @@ $$
 此时蒙特卡洛估计的方差等于
 $$
 \begin{aligned}
-V[F] &= \frac{1}{n} V\left[\frac{f(X)}{p(X)}\right] \\
-&= \frac{1}{n} V[\frac{1}{c}] \\
+V[F] &= \frac{1}{n} V\left[\frac{f(X)}{p(X)}\right] \\[10px]
+&= \frac{1}{n} V[\frac{1}{c}] \\[10px]
 &= 0
 \end{aligned}
 $$
