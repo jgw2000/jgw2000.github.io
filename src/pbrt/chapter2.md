@@ -1,22 +1,22 @@
 ---
 # 这是文章的标题
-title: 蒙特卡洛积分
+title: 辐射度量学
 # 你可以自定义封面图片
 # cover: /assets/images/cover1.jpg
 # 这是页面的图标
 icon: book
 # 这是侧边栏的顺序
-order: 1
+order: 2
 # 设置作者
 author: 被子
 # 设置写作时间
-date: 2024-11-29
+date: 2025-3-11
 # 一个页面可以有多个分类
 category:
   - 光线追踪
 # 一个页面可以有多个标签
 tag:
-  - 蒙特卡洛积分
+  - 辐射度量学
 # 此页面会在文章列表置顶
 # sticky: true
 # 此页面会出现在星标文章中
@@ -27,148 +27,134 @@ tag:
 # copyright: 无版权
 ---
 
-## 蒙特卡洛估计
-给定 1D 积分 $\int_a^b f(x) dx$，我们随机采样一组独立的均匀随机变量 $X_i \in [a,b]$，蒙特卡洛估计值等于
-$$
-F_n = \frac{b - a}{n} \sum_{i=1}^n f(X_i)
-$$
-期望等于
-$$
-\begin{aligned}
-E[F_n] &= E\left[\frac{b-a}{n}\sum_{i=1}^n f(X_i)\right] \\
-&= \frac{b-a}{n}\sum_{i=1}^n E[f(X_i)] \\
-&= \frac{b-a}{n}\sum_{i=1}^n \int_a^b f(x)p(x) dx \\
-&= \frac{b-a}{n}\sum_{i=1}^n \int_a^b f(x) \frac{1}{b-a} dx \\
-&= \frac{1}{n}\sum_{i=1}^n \int_a^b f(x) dx \\
-&= \int_a^b f(x) dx
-\end{aligned}
-$$
-一般地，如果随机变量根据 PDF $p(x)$ 采样（其中 $p(x) >= 0$），则蒙特卡洛估计值等于
-$$
-F_n = \frac{1}{n} \sum_{i=1}^n \frac{f(X_i)}{p(X_i)}
-$$
-期望等于
-$$
-E[F_n] = \int_a^b f(x) dx
-$$
-
-## 蒙特卡洛估计误差
-:::tip 方差
-$$
-V[F] = E[F - E[F]]^2 = E[F^2] - E[F]^2
-$$
-
-$$
-V[aF] = a^2V[F]
-$$
-:::
-当 $F$ 为蒙特卡洛估计时，方差等于
-$$
-\begin{aligned}
-V\left[F_n\right] &= V\left[\frac{1}{n}\sum_{i=1}^n\frac{f(X_i)}{p(X_i)}\right] \\
-&= \frac{1}{n^2} \sum_{i=1}^n V\left[\frac{f(X_i)}{p(X_i)}\right] \\
-&= \frac{1}{n} V\left[\frac{f(X)}{p(X)}\right]
-\end{aligned}
-$$
-
-可见随着采样数量 $n$ 的增长，方差呈线性的下降，又由于方差表示误差的平方，因此蒙特卡洛估计的误差以 ==$O(n^{-1/2})$== 的速度下降。
-
-:::tip 偏差
-$$
-\beta = E[F] - \int f(x) dx
-$$
-如果有偏估计能够比无偏估计更快的收敛到正确的结果，那么有偏估计仍然是可取的
+:::tip
+辐射度量学提供了一组思想和数学工具用来描述光的传播和反射，是渲染算法推导的基础。
 :::
 
-:::tip 均方差
+## 基本单位
+### 能量 Energy
 $$
-MSE[F] = E\left[\left(F - \int f(x) dx\right)^2\right]
+Q = \frac{hc}{\lambda}
+$$
+其中 $c = 299,472,458$ m/s, $h \approx 6.626 x 10^{-34}$ m^2^kg/s
+
+### 通量 Flux
+:::tip
+辐射通量，也称为功率，表示单位时间内通过某一表面或空间区域内的总能量
+:::
+$$
+\Phi = \lim_{\Delta t \rightarrow 0} \frac{\Delta Q}{\Delta t} = \frac{dQ}{dt}
+$$
+相反，给定通量作为时间函数，我们可以通过对时间积分来计算总能量
+$$
+Q = \int_{t_0}^{t_1} \Phi(t) dt
 $$
 
+### 辐照度 Irradiance / 辐射出射度 Radiant Exitance
+:::tip
+给定一个有限区域 A，辐照度表示进入该区域的平均功率密度，辐射出射度表示离开该区域的平均功率密度
+:::
 $$
-MSE[F] = V[F] + \beta[F]^2
+E = \frac{\Phi}{A}
 $$
-当偏差 $\beta = 0$ 时，均方差等于方差
+更一般地，可以通过极限计算在某一点 p 处的辐照度或辐射出射度
+$$
+E(p) = \lim_{\Delta A \rightarrow 0} \frac{\Delta\Phi(p)}{\Delta A} = \frac{d\Phi(p)}{dA}
+$$
+给定辐照度我们也可以通过对面积积分来计算通量
+$$
+\Phi = \int_A E(p) dA
+$$
+
+### 强度 Intensity
+:::tip
+考虑一个无限小的光源，强度表示该光源发射功率的角密度
+:::
+$$
+I = \lim_{\Delta \omega \rightarrow 0} \frac{\Delta\Phi}{\Delta\omega} = \frac{d\Phi}{d\omega}
+$$
+同样地，给定强度作为方向函数 $I(\omega)$，我们可以通过对方向积分来计算通量
+$$
+\Phi = \int_\Omega I(\omega) d\omega
+$$
+
+### 辐射 Radiance
+:::tip
+这是最后也是最重要的概念，表示单位面积单位方向的平均功率
+:::
+$$
+L(p,\omega) = \lim_{\Delta\omega\rightarrow 0}\frac{\Delta E_\omega (p)}{\Delta\omega} = \frac{d E_\omega(p)}{d\omega}
+$$
+其中 $E_\omega$ 表示垂直于 $\omega$ 方向的表面上的辐照度，根据通量可以定义为
+$$
+L = \frac{d^2\Phi}{d\omega dA^\perp}
+$$
+
+### 辐射光谱分布
+$$
+L_\lambda = \lim_{\Delta\lambda\rightarrow 0}\frac{\Delta L}{\Delta\lambda} = \frac{dL}{d\lambda}
+$$
+通过对波长积分可以计算出辐射量
+$$
+L = \int_{\lambda_0}^{\lambda_1} L_\lambda(\lambda)d\lambda
+$$
+
+## 亮度 Luminance / 光度测定 Photometry
+:::tip
+所有辐射测量（如通量、辐射度等）都有相应的光度测量。光度测定是从人类视觉系统感知的角度研究可见电磁辐射。每个光谱辐射量都可以通过与光谱响应曲线积分转换为其相应的光度量，该曲线描述了人眼对各种波长的相对敏感度。
 :::
 
-:::tip 样本方差
-随机采样一组独立的随机变量 $X_i$，样本均值 $\bar{X} = (1/n) \sum X_i$, 则样本方差等于
+:::tip
+亮度衡量光谱功率分布在人类观察者眼中的亮度，定义为
 $$
-S = \frac{1}{n-1} \sum_{i=1}^n (X_i - \bar{X})^2
-$$
-样本方差可以理解为对样本总体方差的一个无偏估计
-:::
-
-## 提升蒙特卡洛估计效率
-### 分层采样 Stratified Sampling
-:::tip 基本思想
-将积分域 $\Lambda$ 划分成 $n$ 个不重叠的区域 $\Lambda_1,\Lambda_2,...,\Lambda_n$，且满足
-$
-\mathop{\cup}\limits_{i=1}^n \Lambda_i = \Lambda
-$
-，我们根据概率 $p_i$ 从每一个 $\Lambda_i$ 中随机抽取 $n_i$ 个样本，则在 $\Lambda_i$ 内的蒙特卡洛估计值等于
-$$
-F_i = \frac{1}{n_i} \sum_{j=1}^{n_i} \frac{f(X_{i,j})}{p_i(X_{i,j})}
-$$
-整体估计
-$$
-\begin{aligned}
-F &= \frac{1}{m} \sum_{i=1}^m \frac{f(X_i)}{p(X_i)} = \frac{1}{m} \sum_{i=1}^n \sum_{j=1}^{n_i} \frac{f(X_{i,j})}{p_i(X_{i,j})} \\
-&= \frac{n_i}{m} \sum_{i=1}^n \frac{1}{n_i} \sum_{j=1}^{n_i} \frac{f(X_{i,j})}{p_i(X_{i,j})} \\
-&= \frac{n_i}{m} \sum_{i=1}^n F_i \\
-&= \sum_{i=1}^n v_i F_i
-\end{aligned}
-
-其中 \, v_i \, 表示第 \, i \, 个区域所占的比例
+Y = \int_\lambda L_\lambda(\lambda) V(\lambda) d\lambda
 $$
 :::
 
-- [ ] TODO
+所有其他的辐射度量都有对应的光度测量
 
-### 重要性采样 Importance Sampling
-::: tip 基本思想
-当使用和被积函数 $f(x)$ 相似的分布进行采样时，即 $p(x) \propto f(x)$ 或 $p(x) = cf(x)$，蒙特卡洛估计会收敛的更快。
-:::
+![](/pbrt/images/chapter2_1.png)
 
-假设令 $p(x) = cf(x)$，根据 $\int p(x) = 1$，可得
+## 辐射相关积分
+![](/pbrt/images/chapter2_2.png)
+
 $$
-c = \frac{1}{\int f(x) dx}
-$$
-此时蒙特卡洛估计的方差等于
-$$
-\begin{aligned}
-V[F] &= \frac{1}{n} V\left[\frac{f(X)}{p(X)}\right] \\[10px]
-&= \frac{1}{n} V[\frac{1}{c}] \\[10px]
-&= 0
-\end{aligned}
+E(p, \emph{n}) = \int_\Omega L_i(p,\omega)|cos\theta|d\omega
 $$
 
-然后实际上我们并不知道 $f(x)$ 的分布，但是可以使用和 $f(x)$ 相似的分布，从而降低方差 ！
+### 对投影立体角积分
+![](/pbrt/images/chapter2_3.png)
 
-### 多重重要性采样 Multiple Importance Sampling（MIS）
-- [ ] TODO
-
-### 俄罗斯轮盘 Russian Roulette
-::: tip 基本思想
-对于形如 $f(X)v(X)$ 的被积函数，其中 $f(x)$ 很容易评估而 $v(X)$ 计算很复杂，当 $f(x)$ 很小时我们可以跳过整个的计算，但会引入偏差，俄罗斯轮盘正是用于解决该问题的。
-:::
-
-使用俄罗斯轮盘的蒙特卡洛估计等于
 $$
-F' = \left\{
-\begin{aligned}
-&\frac{F - qc}{1-q} \\
-&c
-\end{aligned}
-\right.
+d\omega^\perp = |cos\theta|d\omega
 $$
 
-通常 $c = 0$，期望
+则有
+
 $$
-E[F'] = (1-q)\left(\frac{E[F] - qc}{1 - q}\right) + qc = E[F]
+E(p, n) = \int_{H^2(\emph{n})} L_i(p,\omega) d\omega^{\perp}
 $$
 
-使用俄罗斯轮盘总是会==增加方差==
+### 对球面坐标积分
+![](/pbrt/images/chapter2_4.png)
 
-### 划分 Splitting
-- [ ] TODO
+$$
+d\omega = sin\theta\;d\theta\;d\phi
+$$
+
+则有
+$$
+E(p, n) = \int_0^{2\pi} \int_0^{\pi / 2} L_i(p,\theta,\phi)\;cos\theta\;sin\theta\;d\theta\;d\phi
+$$
+
+### 对面积积分
+![](/pbrt/images/chapter2_5.png)
+
+$$
+d\omega = \frac{dA cos\theta}{r^2}
+$$
+
+则有
+$$
+E(p, n) = \int_A L cos\theta_i \frac{cos\theta_o dA}{r^2}
+$$
