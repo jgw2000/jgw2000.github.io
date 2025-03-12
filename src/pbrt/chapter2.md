@@ -78,7 +78,7 @@ $$
 \Phi = \int_\Omega I(\omega) d\omega
 $$
 
-### 辐射 Radiance
+### 辐射度 Radiance
 :::tip
 这是最后也是最重要的概念，表示单位面积单位方向的平均功率
 :::
@@ -157,4 +157,65 @@ $$
 则有
 $$
 E(p, n) = \int_A L cos\theta_i \frac{cos\theta_o dA}{r^2}
+$$
+
+## 表面反射
+### BRDF / BTDF
+![](/pbrt/images/chapter2_6.png)
+
+双向反射分布函数 BRDF 给出了描述表面反射的形式，给定入射方向 $\omega_i$，则点 p 处的微分辐照度为
+$$
+dE(p,\omega_i) = L_i(p,\omega_i) cos\theta_i d\omega_i
+$$
+
+一部分 radiance 将沿着方向 $\omega_o$ 反射出去，又因为几何光学的线性假设，被反射的辐射度和入射的辐照度成正比
+$$
+dL_o(p,\omega_o) \propto dE(p,\omega_i)
+$$
+这个比例常数定义了表面的 BDDF $f_r$
+$$
+f_r(p,\omega_o,\omega_i) = \frac{dL_o(p,\omega_o)}{dE(p,\omega_i)} = \frac{dL_o(p,\omega_o)}{L_i(p,\omega_i)cos\theta_i d\omega_i}
+$$
+
+:::tip
+基于物理的 BRDF 具有两个重要性质：
+1. $f_r(p,\omega_i,\omega_o) = f_r(p,\omega_o,\omega_i)$
+2. 能量守恒：
+$$
+\int_{H^2(\emph{n})} f_r(p,\omega_o,\omega') cos\theta' d\omega' \le 1
+$$
+:::
+
+:::tip 半球定向反射
+描述了表面上某一点收到来自半球方向的常量光照后，反射到给定方向上的比例，定义为
+$$
+\rho_{hd}(\omega_o) = \int_{H^2(\emph{n})} f_r(p,\omega_o,\omega_i)|cos \theta_i| d\omega_i
+$$
+:::
+
+双向透射分布函数 BTDF $f_t$ 描述了透射光的分布，定义和 BRDF 类似，BRDF 和 BTDF 可以统一定义为双向散射分布函数 BSDF $f$
+
+:::tip 散射方程
+$$
+L_o(p,\omega_o) = \int_{S^2} f(p,\omega_o,\omega_i) L_i(p,\omega_i) |cos\theta_i| d\omega_i
+$$
+:::
+
+:::tip 反射方程
+$$
+L_o(p,\omega_o) = \int_{H^2(\emph{n})} f(p,\omega_o,\omega_i) L_i(p,\omega_i) |cos\theta_i| d\omega_i
+$$
+:::
+
+### BSSRDF
+![](/pbrt/images/chapter2_7.png)
+
+双向散射表面反射分布函数 BSSRDF 描述了经过次表面后的散射，定义为
+$$
+S(p_o,\omega_o,p_i,\omega_i) = \frac{dL_o(p_o,\omega_o)}{d\Phi(p_i,\omega_i)}
+$$
+
+一般形式的散射方程
+$$
+L_o(p_o,\omega_o) = \int_A \int_{H^(\emph{n})} S(p_o,\omega_o,p_i,\omega_i) L_i(p_i,\omega_i)|cos\theta_i|d\omega_i dA
 $$
