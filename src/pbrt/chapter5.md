@@ -177,3 +177,118 @@ $$
 :::info Malley 方法
 从单位圆中均匀采样点，然后将该点向上投影到半球面上，如此获得的采样点即满足余弦加权分布
 :::
+
+## 镜面反射和透射
+### 折射率
+:::info 定义
+通常用折射率 IOR 来概括光的速度降低，例如，光遇到折射率等于 2 的材质表面后速度会降为原来的一半。折射率的范围通常在 1.0 - 2.5 之间且随光的波长而变化，用希腊字母 $\eta$ 表示。
+<br><br>
+当光遇到 IOR 值突然变化的边界时会发生明显的反射，折射率 $\eta$ 控制了表面的外观表现，因此对于该值的良好估计对于基于物理的渲染非常重要。
+:::
+
+![](/pbrt/images/chapter5_5.png)
+
+### 镜面反射定律
+给定入射光的方向 $(\theta_i,\phi_i)$，完美镜面的反射方向 $(\theta_r,\phi_r)$ 满足以下性质：
+$$
+\begin{aligned}
+\theta_r &= \theta_i \\
+\phi_r &= \phi_i + \pi
+\end{aligned}
+$$
+
+也可以使用向量来计算
+
+<div align=center>
+<img src=/pbrt/images/chapter5_6.png style="zoom:70%"/>
+</div>
+
+<div align=center>
+<img src=/pbrt/images/chapter5_7.png style="zoom:70%"/>
+</div>
+
+### 斯涅尔定律 Snell's Law
+:::info 定义
+斯涅尔定律描述了光的入射方向 $(\theta_i,\phi_i)$ 和透射方向 $(\theta_t,\phi_t)$ 之间的关系，依赖于边界两边介质的折射率 $\eta_i$ 和 $\eta_t$，满足如下性质：
+$$
+\begin{aligned}
+\eta_i \, sin\theta_i &= \eta_t \, sin\theta_t \\
+\phi_t &= \phi_i + \pi
+\end{aligned}
+$$
+:::
+
+<div align=center>
+<img src=/pbrt/images/chapter5_8.png style="zoom:70%"/>
+</div>
+
+一个有用的观察：斯涅尔定律不依赖于具体的 $\eta_i$ 和 $\eta_t$ 的值，而是他们的比值，因此该定律也可以写成
+$$
+sin\theta_i = \eta \, sin\theta_t
+$$
+其中 $\eta = \frac{\eta_t}{\eta_i}$ 表示相对折射率
+
+同样也可以使用向量来计算
+
+<div align=center>
+<img src=/pbrt/images/chapter5_9.png style="zoom:70%"/>
+</div>
+
+### 菲涅尔等式
+$$
+\begin{aligned}
+r_{\|} = \frac{\eta_t \, cos\theta_i - \eta_i \, cos\theta_t}{\eta_t \, cos\theta_i + \eta_i \, cos\theta_t} \\[10px]
+r_{\perp} = \frac{\eta_i \, cos\theta_i - \eta_t \, cos\theta_t}{\eta_i \, cos\theta_i + \eta_t \, cos\theta_t}
+\end{aligned}
+$$
+
+同样也可以用相对折射率来表示
+$$
+r_{\|} = \frac{\eta \, cos\theta_i - cos\theta_t}{\eta \, cos\theta_i + cos\theta_t}, \quad \quad r_{\perp} = \frac{cos\theta_i - \eta \, cos\theta_t}{cos\theta_i + \eta \, cos\theta_t}
+$$
+
+菲涅尔反射
+$$
+F_r = \frac{1}{2} (r_{\|}^2 + r_{\perp}^2)
+$$
+
+Schlick 近似
+$$
+F_r \approx F_0 + (1 - F_0)(1 - cos\theta)^5
+$$
+
+## 导体 BRDF
+::: info
+导体 BRDF 基于两个物理概念：镜面反射定律决定每条光线的反射方向，以及菲涅尔等式决定反射光的比例。剩余的光会折射到导体中，被快速吸收并转化为热量。
+:::
+
+令 $F_r(\omega)$ 表示来自 $\omega$ 方向光的菲涅尔反射比例，我们需要求解 BRDF $f_r$ 使得满足以下等式：
+$$
+L_o(\omega_o) = \int_{H^2(n)} f_r(\omega_o,\omega_i) L_i(\omega_i)|cos\theta_i|d\omega_i = F_r(\omega_r)L_i(\omega_r)
+$$
+
+根据 Dirac delta 分布性质
+$$
+\int f(x)\delta(x-x_0) dx = f(x_0)
+$$
+
+可以猜测导体 BRDF 等于
+$$
+f_r(\omega_o,\omega_i) = \delta(\omega_i - \omega_r) F_r(\omega_i)
+$$
+
+代入可得
+$$
+\begin{aligned}
+L_o(\omega_o) &= \int_{H^2(n)} \delta(\omega_i-\omega_r) F_r(\omega_i) L_i(\omega_i) |cos\theta_i| d\omega_i \\
+&= F_r(\omega_r)L_i(\omega_r)|cos\theta_r|
+\end{aligned}
+$$
+
+综上
+
+:::tip 导体 BRDF
+$$
+f_r(p,\omega_o,\omega_i) = F_r(\omega_r)\frac{\delta(\omega_i-\omega_r)}{|cos\theta_r|}
+$$
+:::
