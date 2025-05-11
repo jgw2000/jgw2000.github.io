@@ -6,7 +6,7 @@ title: 纹理
 # 这是页面的图标
 icon: book
 # 这是侧边栏的顺序
-order: 4
+order: 3
 # 设置作者
 author: 被子
 # 设置写作时间

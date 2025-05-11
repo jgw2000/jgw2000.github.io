@@ -168,7 +168,7 @@ $$
 
 因此
 $$
-p(\theta,\phi) = \frac{1}{\pi} cos\theta\,sin\theta
+p(\omega) = \frac{1}{\pi} cos\theta
 $$
 
 我们可以是使用 Malley 方法来采样该分布
@@ -252,12 +252,30 @@ $$
 F_r = \frac{1}{2} (r_{\|}^2 + r_{\perp}^2)
 $$
 
-Schlick 近似
+::: tip
+导体的折射率 IOR 是一个复数，其中实数部分和之前一样描述光的速度降低，而虚数部分描述光在导体内部传播过程中的衰减。这个衰减非常快，对反射的多少也有显著影响，因此我们也必须考虑这个因素。
+<br><br>
+导体的折射率可以表示为 $\eta - ik$，其中 $k$ 表示吸收系数，入射和出射光都可以用平面波来建模描述随时间和距离 z 而变化的震荡，例如
 $$
-F_r \approx F_0 + (1 - F_0)(1 - cos\theta)^5
+\begin{aligned}
+E(z) = e^{-i\alpha(\eta - ik) z} = e^{-i\alpha\eta z} e^{-\alpha kz}
+\end{aligned}
+$$
+其实数部分等于
+$$
+e^{-\alpha kz} cos(\alpha\eta z)
 $$
 
+下图是黄金的折射率和吸收系数（都依赖于光的波长）
+
+![](/pbrt/images/chapter5_11.png)
+:::
+
 ## 导体 BRDF
+:::warning
+暂时只考虑完美反射的情况
+:::
+
 ::: info
 导体 BRDF 基于两个物理概念：镜面反射定律决定每条光线的反射方向，以及菲涅尔等式决定反射光的比例。剩余的光会折射到导体中，被快速吸收并转化为热量。
 :::
@@ -291,4 +309,16 @@ $$
 $$
 f_r(p,\omega_o,\omega_i) = F_r(\omega_r)\frac{\delta(\omega_i-\omega_r)}{|cos\theta_r|}
 $$
+:::
+
+## 电介质 BSDF
+
+![](/pbrt/images/chapter5_10.png)
+
+:::warning
+暂时只考虑完美反射和折射的情况
+:::
+
+:::info
+电介质的相对折射率是实数，因此除了反射之外还必须考虑折射的情况
 :::
