@@ -141,3 +141,56 @@ $$
 G_2(l,v,m) = \frac{\chi^+(m\cdot v)\chi^+(m\cdot l)}{1+max(\Lambda(v),\Lambda(l))+\lambda(v,l)min(\Lambda(v),\Lambda(l))}
 $$
 :::
+
+## 基于微平面的 BRDF 模型
+### **推导**
+1. 根据 BRDF 定义
+$$
+\begin{aligned}
+f(l, v) &= \frac{dL(M)}{L_i\,|n\cdot l|\,d\omega_i}
+\end{aligned}
+$$
+
+2. 将宏观平面 $L(M)$ 用微平面 $L(m)$ 来表示 (每个微平面投影的 Irradiance 总和除以投影面积)，其中 $D_o(m)$ 表示在投影方向上的可见法线分布
+$$
+\begin{aligned}
+L(M) &= \frac{1}{|n\cdot v|} \int_\Omega L(m)\,G_1(l,v)\,|m\cdot v|\, D(m)\,dm \\
+&= \int_\Omega L(m)\,D_o(m)\,dm
+\end{aligned}
+$$
+
+3. 对上式进行微分
+$$
+dL(M) = \int_\Omega dL(m)\,D_o(m)\,dm
+$$
+
+4. 同样根据 BRDF 定义，微平面 $L(m)$ 可以表示为
+$$
+dL(m) = f_\mu(l,v,m)\,|m\cdot l|\,L_i\,d\omega_i
+$$
+
+5. 结合 3，4 可得
+$$
+\begin{aligned}
+dL(M) &= \int_\Omega f_\mu(l,v,m)\,cos\theta_i\,L_i\,d\omega_i\,D_o(m)\,dm \\
+&= L_i\,d\omega_i\int_\Omega f_\mu(l,v,m)\,|m\cdot l|\,D_o(m)\,dm
+\end{aligned}
+$$
+
+6. 结合 1，5 可得
+$$
+\begin{aligned}
+f(l,v) &= \frac{L_i\,d\omega_i\int_\Omega f_\mu(l,v,m)\,|m\cdot l|\,D_o(m)\,dm}{L_i\,|n\cdot l|\,d\omega_i} \\
+&= \frac{1}{|n\cdot l|}\int_\Omega f_\mu(l,v,m)\,|m\cdot l|\,D_o(m)\,dm \\
+&= \frac{1}{|n\cdot l|}\frac{1}{|n\cdot v|} \int_\Omega f_\mu(l,v,m)\,|m\cdot l|\,G_1(l,v)\,|m\cdot v|\,D(m)\,dm
+\end{aligned}
+$$
+
+我们使用 $G_2$ 代替 $G_1$
+::: tip
+$$
+f(l,v) = \frac{1}{|n\cdot l|}\frac{1}{|n\cdot v|} \int_\Omega f_\mu(l,v,m)\,G_2(l,v,m)\,D(m)\,|m\cdot l|\,|m\cdot v|\,dm
+$$
+:::
+
+其中 n 是宏观平面的法线，m 是微平面的法线
