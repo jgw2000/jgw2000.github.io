@@ -198,13 +198,13 @@ $$
 ### 基于 specular 微平面的 BRDF
 specular BSDF 反射一部分入射光的能量到方向 $s$ 上，可以写成
 $$
-f_s(\bf{i},\bf{o},\bf{m}) = \rho\,\frac{\delta_{\omega_o}(\bf{s},\bf{o})}{|\bf{o}\cdot \bf{m}|}
+f_s(i,o,m) = \rho\,\frac{\delta_{\omega_o}(s,o)}{|o\cdot m|}
 $$
 其中
 $$
-\delta_{\omega_o}(\bf{s},\bf{o}) = \left\{
+\delta_{\omega_o}(s,o) = \left\{
   \begin{align}
-  \infty, &\quad\bf{s} = \bf{o} \notag \\
+  \infty, &\quad s = o \notag \\
   0, &\quad \text{otherwise} \notag
   \end{align}
 \right.
@@ -213,8 +213,8 @@ $$
 为了代入上一节的方程，我们需要使用微平面的法线和其对应的立体角来描述
 $$
 \begin{aligned}
-f_s(\bf{i},\bf{o},\bf{m}) &= \rho\,\frac{\delta_{\omega_m}(\bf{h}(\bf{i}, \bf{o}),\bf{m})}{|\bf{o}\cdot \bf{m}|}\,\Big\|\frac{\partial \omega_h}{\partial \omega_o}\Big\| \\
-&= \rho\,\frac{\delta_{\omega_m}(\bf{h}(\bf{i}, \bf{o}),\bf{m})}{|\bf{o}\cdot \bf{m}|}\,\frac{1}{4|\bf{o}\cdot\bf{h}|}
+f_s(i,o,m) &= \rho\,\frac{\delta_{\omega_m}(h(i, o),m)}{|o\cdot m|}\,\Big\|\frac{\partial \omega_h}{\partial \omega_o}\Big\| \\
+&= \rho\,\frac{\delta_{\omega_m}(h(i, o),m)}{|o\cdot m|}\,\frac{1}{4|o\cdot h|}
 \end{aligned}
 $$
 
@@ -222,7 +222,7 @@ $$
 ::: tip
 $$
 \begin{aligned}
-f(l,v) &= \frac{1}{|n\cdot l|}\frac{1}{|n\cdot v|} \int_\Omega F(m,l)\,\frac{\delta_{\omega_m}(\bf{h}(\bf{l}, \bf{v}),\bf{m})}{|\bf{m}\cdot \bf{v}|}\,\frac{1}{4|\bf{m}\cdot\bf{l}|}\,G_2(l,v,m)\,D(m)\,|m\cdot l|\,|m\cdot v|\,dm \\[3px]
+f(l,v) &= \frac{1}{|n\cdot l|}\frac{1}{|n\cdot v|} \int_\Omega F(m,l)\,\frac{\delta_{\omega_m}(h(l, v),m)}{|m\cdot v|}\,\frac{1}{4|m\cdot l|}\,G_2(l,v,m)\,D(m)\,|m\cdot l|\,|m\cdot v|\,dm \\[3px]
 &= \frac{F(h,l)\,G_2(l,v,h)\,D(h)}{4|n\cdot l||n\cdot v|}
 \end{aligned}
 $$
@@ -230,7 +230,7 @@ $$
 
 ### 基于 diffuse 微平面的 BRDF
 $$
-f_d(\bf{i},\bf{o},\bf{m}) = \frac{1}{\pi}
+f_d(i,o,m) = \frac{1}{\pi}
 $$
 
 代入可得
