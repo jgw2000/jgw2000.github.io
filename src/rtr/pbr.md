@@ -222,7 +222,7 @@ $$
 ::: tip
 $$
 \begin{aligned}
-f(l,v) &= \frac{1}{|n\cdot l|}\frac{1}{|n\cdot v|} \int_\Omega F(m,l)\,\frac{\delta_{\omega_m}(\bf{h}(\bf{l}, \bf{v}),\bf{m})}{|\bf{m}\cdot \bf{v}|}\,\frac{1}{4|\bf{m}\cdot\bf{l}|}\,G_2(l,v,m)\,D(m)\,|m\cdot l|\,|m\cdot v|\,dm \\ [3px]
+f(l,v) &= \frac{1}{|n\cdot l|}\frac{1}{|n\cdot v|} \int_\Omega F(m,l)\,\frac{\delta_{\omega_m}(\bf{h}(\bf{l}, \bf{v}),\bf{m})}{|\bf{m}\cdot \bf{v}|}\,\frac{1}{4|\bf{m}\cdot\bf{l}|}\,G_2(l,v,m)\,D(m)\,|m\cdot l|\,|m\cdot v|\,dm \\[3px]
 &= \frac{F(h,l)\,G_2(l,v,h)\,D(h)}{4|n\cdot l||n\cdot v|}
 \end{aligned}
 $$
