@@ -222,7 +222,11 @@ $$
 ![](/rtr/images/pbr_5.png)
 
 $$
-\Big\|\frac{\partial \omega_h}{\partial \omega_o}\Big\| = \frac{|o\cdot h_r|}{\|\vec{h_r}^2\|}
+\begin{aligned}
+\Big\|\frac{\partial \omega_h}{\partial \omega_o}\Big\| &= \frac{|o\cdot h_r|}{\|\vec{h_r}^2\|} = \frac{|o\cdot h_r|}{(\vec{h_r}\cdot h_r)^2} \\
+&= \frac{|o\cdot h_r|}{((i+o)\cdot h_r)^2} = \frac{|o\cdot h_r|}{(2\,o\cdot h_r)^2} \\
+&= \frac{1}{4|o\cdot h|}
+\end{aligned}
 $$
 :::
 
