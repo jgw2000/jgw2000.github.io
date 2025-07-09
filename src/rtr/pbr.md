@@ -210,13 +210,21 @@ $$
 \right.
 $$
 
-为了代入上一节的方程，我们需要使用微平面的法线和其对应的立体角来描述
+又 $f_s(i,o,m)$ 是以出射方向 $s$ 为积分变量， 为了代入上一节的方程，我们需要使用微平面的法线和其对应的立体角作为积分变量
 $$
 \begin{aligned}
 f_s(i,o,m) &= \rho\,\frac{\delta_{\omega_m}(h(i, o),m)}{|o\cdot m|}\,\Big\|\frac{\partial \omega_h}{\partial \omega_o}\Big\| \\
 &= \rho\,\frac{\delta_{\omega_m}(h(i, o),m)}{|o\cdot m|}\,\frac{1}{4|o\cdot h|}
 \end{aligned}
 $$
+
+::: info
+![](/rtr/images/pbr_5.png)
+
+$$
+\Big\|\frac{\partial \omega_h}{\partial \omega_o}\Big\| = \frac{|o\cdot h_r|}{\|\vec{h_r}^2\|}
+$$
+:::
 
 代入可得
 ::: tip
