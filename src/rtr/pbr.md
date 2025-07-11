@@ -251,3 +251,50 @@ $$
 f(l,v) = \frac{1}{\pi}\frac{1}{|n\cdot l|}\frac{1}{|n\cdot v|} \int_\Omega G_2(l,v,m)\,D(m)\,|m\cdot l|\,|m\cdot v|\,dm
 $$
 :::
+
+## 基于物理的遮挡函数
+
+### Smith 微平面 Profile
+
+::: info 法线/遮挡独立性
+Smith 假定微平面上不同点之间的法线或者高度是不相关的（即使是相邻点之间），是一组随机的不连续的微平面的集合。
+
+![](/rtr/images/pbr_5.png)
+
+$G_1(\omega_o,\omega_m)$ 可以理解为被遮挡的概率，其独立于该点处的法线方向 $\omega_m$，因此可以表示为
+
+$$
+G_1(\omega_o,\omega_m) = G_1^{local}(\omega_o,\omega_m)\,G_1^{dist}(\omega_o)
+$$
+
+其中
+$$
+G_1^{local} = \chi^+(\omega_o\cdot \omega_m)
+$$
+:::
+
+::: tip 遮挡函数公式推导
+$$
+\begin{aligned}
+cos\theta_o &= \int_\Omega G_1(\omega_o,\omega_m)\,(\omega_o,\omega_m)^+\,D(\omega_m)\,d\omega_m \\
+&= \int_\Omega G_1^{local}(\omega_o,\omega_m)\,G_1^{dist}(\omega_o)\,(\omega_o,\omega_m)^+\,D(\omega_m)\,d\omega_m \\
+&= \int_\Omega \chi^+(\omega_o\cdot\omega_m)\,G_1^{dist}(\omega_o)\,(\omega_o,\omega_m)^+\,D(\omega_m)\,d\omega_m \\
+&= G_1^{dist}(\omega_o)\,\int_\Omega (\omega_o,\omega_m)^+\,D(\omega_m)\,d\omega_m \\
+\end{aligned}
+$$
+
+可得
+$$
+G_1(\omega_o,\omega_m) = \chi^+(\omega_o\cdot\omega_m) \frac{cos\theta_o}{\int_\Omega (\omega_o,\omega_m)^+\,D(\omega_m)\,d\omega_m}
+$$
+:::
+
+### Smith 遮挡函数
+通过将积分域从法线变换到斜率空间，可以证明 Smith 遮挡函数可以表示成
+$$
+G_1^{dist}(\omega_o,\omega_m) = \frac{1}{1 + \Lambda(\omega_o)}
+$$
+即
+$$
+G_1(\omega_o,\omega_m) = \frac{\chi^+(\omega_o\cdot\omega_m)}{1+\Lambda(\omega_o)}
+$$
