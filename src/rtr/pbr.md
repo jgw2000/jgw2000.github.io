@@ -301,7 +301,7 @@ $$
 
 ### 遮挡函数的拉伸不变性
 
-![](/rtr/images/pbr_6.png)
+![](/rtr/images/pbr_7.png)
 
 #### 斜率分布
 如果微平面是一个高度场，其高度分布表示为 $P^1(h)$，那么这个微平面的斜率就是高度的梯度，$(x_{\tilde{m}},y_{\tilde{m}}) = \nabla h$， 斜率的分布可以表示为 $P^{22}(x_{\tilde{m}},y_{\tilde{m}})$
@@ -334,7 +334,7 @@ $$
 
 其中 $f$ 是一维函数定义了分布的形状，$\alpha$ 是粗糙度参数
 
-1. Beckmann Distribution
+1. **Beckmann Distribution**
    $$
    \begin{aligned}
    P^{22}(x_{\tilde{m}},y_{\tilde{m}}) &= \frac{1}{\pi\alpha^2}exp\left(-\frac{x_{\tilde{m}}^2+y_{\tilde{m}}^2}{\alpha^2}\right) \\
@@ -354,7 +354,7 @@ $$
 \right.
 $$
 
-2. GGX Distribution
+2. **GGX Distribution**
    $$
    \begin{aligned}
    P^{22}(x_{\tilde{m}},y_{\tilde{m}}) &= \frac{1}{\pi\alpha^2\left(1 + \frac{x_{\tilde{m}}^2+y_{\tilde{m}}^2}{\alpha^2}\right)^2} \\
