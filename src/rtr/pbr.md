@@ -298,3 +298,38 @@ $$
 $$
 G_1(\omega_o,\omega_m) = \frac{\chi^+(\omega_o\cdot\omega_m)}{1+\Lambda(\omega_o)}
 $$
+
+### 遮挡函数的拉伸不变性
+
+![](/rtr/images/pbr_7.png)
+
+#### 斜率分布
+如果微平面是一个高度场，其高度分布表示为 $P^1(h)$，那么这个微平面的斜率就是高度的梯度，$(x_{\tilde{m}},y_{\tilde{m}}) = \nabla h$， 斜率的分布可以表示为 $P^{22}(x_{\tilde{m}},y_{\tilde{m}})$
+$$
+\tilde{m} = (x_{\tilde{m}},y_{\tilde{m}}) = \left(-\frac{x_m}{z_m},-\frac{y_m}{z_m}\right) = -tan\theta_m(cos\phi_m,sin\phi_m)
+$$
+其中法线 $\omega_m=(x_m,y_m,z_m)$ 也可以用斜率表示为
+$$
+\omega_m = \frac{(-x_{\tilde{m}},-y_{\tilde{m}},1)}{\sqrt{x^2_{\tilde{m}}+y^2_{\tilde{m}}+1}}
+$$
+斜率分布必须满足归一化
+$$
+\int_{-\infty}^\infty\int_{-\infty}^\infty P^{22} (x_{\tilde{m}},y_{\tilde{m}})\,dx_{\tilde{m}}dy_{\tilde{m}} = 1
+$$
+
+又斜率分布和法线分布之间满足如下等式
+$$
+P^{22}(\tilde{m})\,d\tilde{m} = (\omega_m\cdot\omega_g)\,D(\omega_m)\,d\omega_m
+$$
+
+则法线分布可以表示为
+$$
+D(\omega_m) = \frac{P^{22}(x_{\tilde{m}},y_{\tilde{m}})}{cos^4\theta_m}
+$$
+
+#### 各向同性且形状不变的斜率分布
+$$
+P^{22}(x_{\tilde{m}},y_{\tilde{m}},\alpha) = \frac{1}{\alpha^2}f\left(\sqrt{(\frac{x_{\tilde{m}}}{\alpha})^2+(\frac{y_{\tilde{m}}}{\alpha})^2}\right) = \frac{1}{\alpha^2}f\left(\frac{\sqrt{x_{\tilde{m}}^2+y_{\tilde{m}}^2}}{\alpha}\right) = \frac{1}{\alpha^2}f\left(\frac{tan\theta_m}{\alpha}\right)
+$$
+
+其中 $f$ 是一维函数定义了分布的形状，$\alpha$ 是粗糙度参数
