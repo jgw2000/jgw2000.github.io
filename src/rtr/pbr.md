@@ -301,7 +301,7 @@ $$
 
 ### 遮挡函数的拉伸不变性
 
-![](/rtr/images/pbr_7.png)
+![](/rtr/images/pbr_6.png)
 
 #### 斜率分布
 如果微平面是一个高度场，其高度分布表示为 $P^1(h)$，那么这个微平面的斜率就是高度的梯度，$(x_{\tilde{m}},y_{\tilde{m}}) = \nabla h$， 斜率的分布可以表示为 $P^{22}(x_{\tilde{m}},y_{\tilde{m}})$
@@ -333,3 +333,34 @@ P^{22}(x_{\tilde{m}},y_{\tilde{m}},\alpha) = \frac{1}{\alpha^2}f\left(\sqrt{(\fr
 $$
 
 其中 $f$ 是一维函数定义了分布的形状，$\alpha$ 是粗糙度参数
+
+1. Beckmann Distribution
+   $$
+   \begin{aligned}
+   P^{22}(x_{\tilde{m}},y_{\tilde{m}}) &= \frac{1}{\pi\alpha^2}exp\left(-\frac{x_{\tilde{m}}^2+y_{\tilde{m}}^2}{\alpha^2}\right) \\
+   D(\omega_m) &= \frac{\chi^+(\omega_m\cdot\omega_g)}{\pi\alpha^2cos^4\theta_m}exp\left(-\frac{tan^2\theta_m}{\alpha^2}\right) \\
+   \Lambda(a) &= \frac{erf(a) - 1}{2} + \frac{1}{2a\sqrt{\pi}}exp(-a^2)
+   \end{aligned}
+   $$
+
+   其中 $a = \frac{1}{\alpha\,tan\theta_o}$，$\alpha$ 控制平面的粗糙度，其正比于微平面斜率的均方根，等于0时表示完全光滑
+
+$$
+\Lambda(a) \approx \left\{
+  \begin{align}
+  \quad&\frac{1-1.249a+0.396a^2}{3.535a+2.181a^2} &\quad \text{if } a < 1.6 \notag \\
+  \quad&0 &\quad \text{otherwise} \notag
+  \end{align}
+\right.
+$$
+
+2. GGX Distribution
+   $$
+   \begin{aligned}
+   P^{22}(x_{\tilde{m}},y_{\tilde{m}}) &= \frac{1}{\pi\alpha^2\left(1 + \frac{x_{\tilde{m}}^2+y_{\tilde{m}}^2}{\alpha^2}\right)^2} \\
+   D(\omega_m) &= \frac{\chi^+(\omega_m\cdot\omega_g)}{\pi\alpha^2cos^4\theta_m\left(1+\frac{tan^2\theta_m}{\alpha^2}\right)^2} \\
+   \Lambda(a) &= \frac{-1+\sqrt{1 + \frac{1}{a^2}}}{2}
+   \end{aligned}
+   $$
+
+   其中 $a = \frac{1}{\alpha\,tan\theta_o}$，在迪士尼着色模型中使用 $a = r^2$ 来控制粗糙度，其中 $r \in [0,1]$ 
