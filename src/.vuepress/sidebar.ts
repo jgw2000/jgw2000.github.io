@@ -4,13 +4,6 @@ export default sidebar({
   "/": [
     "",
     {
-      text: "算法导论",
-      icon: "laptop-code",
-      prefix: "clrs/",
-      link: "clrs/",
-      children: "structure",
-    },
-    {
       text: "实时渲染",
       icon: "shapes",
       prefix: "rtr/",
