@@ -45,13 +45,13 @@ tag:
 
 ![](/rtr/images/pbr_3.png)
 
-微平面的法线统计分布 NDF D(m) 定义为：
+微平面的法线统计分布 NDF D(m) 表示在 1 个单位宏观面积下，方向角等于 $\omega_m$ 的所有微平面的总面积，对方向角取微分可得:
 
 $$
 dA_m = D(m)\, d\omega_m\,A
 $$
 
-表示在宏观平面面积和方向角上的联合概率密度，进一步可以得到如下等式
+将 A 移到等式左边，两边同时积分可得:
 
 $$
 \frac{1}{A} \int (n\cdot m)\,dA_m = \int_\Omega D(m)\,(n\cdot m)\,d\omega_m
