@@ -316,7 +316,7 @@ $$
 
 ![](/rtr/images/pbr_7.png)
 
-#### 斜率分布[^1]
+#### **斜率分布**[^1]
 如果微平面是一个高度场，其高度分布表示为 $P^1(h)$，那么这个微平面的斜率就是高度的梯度，$(x_{\tilde{m}},y_{\tilde{m}}) = \nabla h$， 斜率的分布可以表示为 $P^{22}(x_{\tilde{m}},y_{\tilde{m}})$
 $$
 \tilde{m} = (x_{\tilde{m}},y_{\tilde{m}}) = \left(-\frac{x_m}{z_m},-\frac{y_m}{z_m}\right) = -tan\theta_m(cos\phi_m,sin\phi_m)
@@ -337,13 +337,16 @@ $$
 
 则法线分布可以表示为
 $$
-D(\omega_m) = \frac{P^{22}(x_{\tilde{m}},y_{\tilde{m}})}{cos^4\theta_m}
+D(\omega_m,\alpha) = \frac{P^{22}(x_{\tilde{m}},y_{\tilde{m}},\alpha)}{cos^4\theta_m}
 $$
+其中 $\frac{1}{cos^4\theta_m}$ 表示 Jacobian 项，$\alpha$ 表示粗糙度参数
 
-#### 各向同性且形状不变的斜率分布
+::: info 各向同性且形状不变的斜率分布
+当斜率的分布只依赖于斜率幅度 $tan\theta_m = \sqrt{x^2_{\tilde{m}} + y^2_{\tilde{m}}}$ 和粗糙度参数 $\alpha$ 的比值时，即
 $$
 P^{22}(x_{\tilde{m}},y_{\tilde{m}},\alpha) = \frac{1}{\alpha^2}f\left(\sqrt{(\frac{x_{\tilde{m}}}{\alpha})^2+(\frac{y_{\tilde{m}}}{\alpha})^2}\right) = \frac{1}{\alpha^2}f\left(\frac{\sqrt{x_{\tilde{m}}^2+y_{\tilde{m}}^2}}{\alpha}\right) = \frac{1}{\alpha^2}f\left(\frac{tan\theta_m}{\alpha}\right)
 $$
+:::
 
 其中 $f$ 是一维函数定义了分布的形状，$\alpha$ 是粗糙度参数
 
