@@ -378,4 +378,4 @@ $$
 
    其中 $a = \frac{1}{\alpha\,tan\theta_o}$，在迪士尼着色模型中使用 $a = r^2$ 来控制粗糙度，其中 $r \in [0,1]$
 
-   [^1]: https://www.reedbeta.com/blog/slope-space-in-brdf-theory/
+   [^1]: [Slope Space in BRDF Theory](https://www.reedbeta.com/blog/slope-space-in-brdf-theory/)
