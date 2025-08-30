@@ -196,17 +196,29 @@ $$
 其中 n 是宏观平面的法线，m 是微平面的法线
 
 ### 基于 specular 微平面的 BRDF
-specular BSDF 反射一部分入射光的能量到方向 $s$ 上，可以写成
+specular BSDF 反射一部分入射光的能量到方向 $s$ 上，反射比例 $\rho$ (即菲涅尔反射 F) 和反射方向 $s$ 是入射方向 $i$ 和局部表面法线 $m$ 的函数，可以写成
 $$
-f_s(i,o,m) = \rho\,\frac{\delta_{\omega_o}(s,o)}{|o\cdot m|}
+\begin{aligned}
+f_s(i,o,m) &= \frac{dL(m)\,\delta_{\omega_o}(s,o)}{L_i\,d\omega_i\,|i\cdot m|} = \frac{dL(m)}{L_i\,d\omega_i}\frac{\delta_{\omega_o}(s,o)}{|i\cdot m|} \\
+&= \rho\,\frac{\delta_{\omega_o}(s,o)}{|o\cdot m|}
+\end{aligned}
 $$
 其中
 $$
 \delta_{\omega_o}(s,o) = \left\{
-  \begin{align}
+  \begin{array}{cl}
   \infty, &\quad s = o \notag \\
   0, &\quad \text{otherwise} \notag
-  \end{align}
+  \end{array}
+\right.
+$$
+表示 Dirac delta 函数，且满足如下等式
+$$
+\int_\Omega g(o)\,\delta_{\omega_o}(s,o)\,d\omega_o = \left\{
+  \begin{array}{cl}
+  g(s) &\quad s = o \notag \\
+  0 &\quad \text{otherwise} \notag
+  \end{array}
 \right.
 $$
 
@@ -214,7 +226,8 @@ $$
 $$
 \begin{aligned}
 f_s(i,o,m) &= \rho\,\frac{\delta_{\omega_m}(h(i, o),m)}{|o\cdot m|}\,\Big\|\frac{\partial \omega_h}{\partial \omega_o}\Big\| \\
-&= \rho\,\frac{\delta_{\omega_m}(h(i, o),m)}{|o\cdot m|}\,\frac{1}{4|o\cdot h|}
+&= \rho\,\frac{\delta_{\omega_m}(h(i, o),m)}{|o\cdot m|}\,\frac{1}{4|o\cdot h|} \\
+&= F(h,i)\,\frac{\delta_{\omega_m}(h(i, o),m)}{|o\cdot m|}\,\frac{1}{4|o\cdot h|} \\
 \end{aligned}
 $$
 
@@ -303,7 +316,7 @@ $$
 
 ![](/rtr/images/pbr_7.png)
 
-#### 斜率分布
+#### 斜率分布[^1]
 如果微平面是一个高度场，其高度分布表示为 $P^1(h)$，那么这个微平面的斜率就是高度的梯度，$(x_{\tilde{m}},y_{\tilde{m}}) = \nabla h$， 斜率的分布可以表示为 $P^{22}(x_{\tilde{m}},y_{\tilde{m}})$
 $$
 \tilde{m} = (x_{\tilde{m}},y_{\tilde{m}}) = \left(-\frac{x_m}{z_m},-\frac{y_m}{z_m}\right) = -tan\theta_m(cos\phi_m,sin\phi_m)
@@ -363,4 +376,6 @@ $$
    \end{aligned}
    $$
 
-   其中 $a = \frac{1}{\alpha\,tan\theta_o}$，在迪士尼着色模型中使用 $a = r^2$ 来控制粗糙度，其中 $r \in [0,1]$ 
+   其中 $a = \frac{1}{\alpha\,tan\theta_o}$，在迪士尼着色模型中使用 $a = r^2$ 来控制粗糙度，其中 $r \in [0,1]$
+
+   [^1]: https://www.reedbeta.com/blog/slope-space-in-brdf-theory/
