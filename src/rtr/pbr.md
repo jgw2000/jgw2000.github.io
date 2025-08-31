@@ -143,6 +143,10 @@ $$
 :::
 
 ## 基于微平面的 BRDF 模型
+<div align=center>
+<img src=/rtr/images/pbr_8.png style="zoom:50%"/>
+</div>
+
 ### **推导**
 1. 根据 BRDF 定义
 $$
@@ -330,55 +334,31 @@ $$
 \int_{-\infty}^\infty\int_{-\infty}^\infty P^{22} (x_{\tilde{m}},y_{\tilde{m}})\,dx_{\tilde{m}}dy_{\tilde{m}} = 1
 $$
 
-又斜率分布和法线分布之间满足如下等式
-$$
-P^{22}(\tilde{m})\,d\tilde{m} = (\omega_m\cdot\omega_g)\,D(\omega_m)\,d\omega_m
-$$
-
-则法线分布可以表示为
+将积分域从斜率空间转换到法线空间后，法线分布可以表示为
 $$
 D(\omega_m,\alpha) = \frac{P^{22}(x_{\tilde{m}},y_{\tilde{m}},\alpha)}{cos^4\theta_m}
 $$
 其中 $\frac{1}{cos^4\theta_m}$ 表示 Jacobian 项，$\alpha$ 表示粗糙度参数
 
-::: info 各向同性且形状不变的斜率分布
-当斜率的分布只依赖于斜率幅度 $tan\theta_m = \sqrt{x^2_{\tilde{m}} + y^2_{\tilde{m}}}$ 和粗糙度参数 $\alpha$ 的比值时，即
+#### **形状不变性**
+若干各向同性的斜率分布 $P^{22}$ 依赖于粗糙度参数 $\alpha$, 且改变 $\alpha$ 等价于拉伸斜率的分布而不改变其形状。例如如下形式：
 $$
-P^{22}(x_{\tilde{m}},y_{\tilde{m}},\alpha) = \frac{1}{\alpha^2}f\left(\sqrt{(\frac{x_{\tilde{m}}}{\alpha})^2+(\frac{y_{\tilde{m}}}{\alpha})^2}\right) = \frac{1}{\alpha^2}f\left(\frac{\sqrt{x_{\tilde{m}}^2+y_{\tilde{m}}^2}}{\alpha}\right) = \frac{1}{\alpha^2}f\left(\frac{tan\theta_m}{\alpha}\right)
-$$
-:::
-
-其中 $f$ 是一维函数定义了分布的形状，$\alpha$ 是粗糙度参数
-
-1. **Beckmann Distribution**
-   $$
-   \begin{aligned}
-   P^{22}(x_{\tilde{m}},y_{\tilde{m}}) &= \frac{1}{\pi\alpha^2}exp\left(-\frac{x_{\tilde{m}}^2+y_{\tilde{m}}^2}{\alpha^2}\right) \\
-   D(\omega_m) &= \frac{\chi^+(\omega_m\cdot\omega_g)}{\pi\alpha^2cos^4\theta_m}exp\left(-\frac{tan^2\theta_m}{\alpha^2}\right) \\
-   \Lambda(a) &= \frac{erf(a) - 1}{2} + \frac{1}{2a\sqrt{\pi}}exp(-a^2)
-   \end{aligned}
-   $$
-
-   其中 $a = \frac{1}{\alpha\,tan\theta_o}$，$\alpha$ 控制平面的粗糙度，其正比于微平面斜率的均方根，等于0时表示完全光滑
-
-$$
-\Lambda(a) \approx \left\{
-  \begin{align}
-  \quad&\frac{1-1.249a+0.396a^2}{3.535a+2.181a^2} &\quad \text{if } a < 1.6 \notag \\
-  \quad&0 &\quad \text{otherwise} \notag
-  \end{align}
-\right.
+\begin{aligned}
+P^{22}(x_{\tilde{m}},y_{\tilde{m}},\alpha) &= \frac{1}{\alpha^2}f\left(\sqrt{(\frac{x_{\tilde{m}}}{\alpha})^2+(\frac{y_{\tilde{m}}}{\alpha})^2}\right) \\
+&= \frac{1}{\alpha^2}f\left(\frac{\sqrt{x_{\tilde{m}}^2+y_{\tilde{m}}^2}}{\alpha}\right) \\
+&= \frac{1}{\alpha^2}f\left(\frac{tan\theta_m}{\alpha}\right)
+\end{aligned}
 $$
 
-2. **GGX Distribution**
-   $$
-   \begin{aligned}
-   P^{22}(x_{\tilde{m}},y_{\tilde{m}}) &= \frac{1}{\pi\alpha^2\left(1 + \frac{x_{\tilde{m}}^2+y_{\tilde{m}}^2}{\alpha^2}\right)^2} \\
-   D(\omega_m) &= \frac{\chi^+(\omega_m\cdot\omega_g)}{\pi\alpha^2cos^4\theta_m\left(1+\frac{tan^2\theta_m}{\alpha^2}\right)^2} \\
-   \Lambda(a) &= \frac{-1+\sqrt{1 + \frac{1}{a^2}}}{2}
-   \end{aligned}
-   $$
+其中 $f$ 是一维函数定义了分布的形状，$\alpha$ 是粗糙度参数，该形式满足如下性质：
+$$
+P^{22}(x_{\tilde{m}},y_{\tilde{m}},\alpha) = \frac{1}{\lambda^2} P^{22}\left(\frac{x_{\tilde{m}}}{\lambda},\frac{y_{\tilde{m}}}{\lambda},\frac{\alpha}{\lambda}\right), \quad \forall \lambda > 0
+$$
 
-   其中 $a = \frac{1}{\alpha\,tan\theta_o}$，在迪士尼着色模型中使用 $a = r^2$ 来控制粗糙度，其中 $r \in [0,1]$
+表示当 $\frac{\alpha}{\lambda} \rightarrow \alpha$ 变为原来的 $\lambda$ 倍时，等价于斜率分布拉伸为原来的 $\lambda$ 倍，即斜率 $\left(\frac{x_{\tilde{m}}}{\lambda},\frac{y_{\tilde{m}}}{\lambda}\right)$ 拉伸到 $(x_{\tilde{m}},y_{\tilde{m}})$ 且概率降低为 $\frac{1}{\lambda^2}$。此时，遮挡函数只依赖于变量
+$$
+a = \frac{1}{\alpha tan\theta_o}
+$$
+其中 $\frac{1}{tan\theta_o}$ 表示出射方向的斜率
 
-   [^1]: [Slope Space in BRDF Theory](https://www.reedbeta.com/blog/slope-space-in-brdf-theory/)
+[^1]: [Slope Space in BRDF Theory](https://www.reedbeta.com/blog/slope-space-in-brdf-theory/)
