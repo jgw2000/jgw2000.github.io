@@ -388,7 +388,7 @@ $$
 
 则法线分布等于
 $$
-D(\omega_m) = \frac{1}{\pi\alpha^2\,cos^4\theta_m\left(1+\frac{tan^2\theta_m}{\alpha^2}\right)^2} =
+D(\omega_m,\alpha) = \frac{1}{\pi\alpha^2\,cos^4\theta_m\left(1+\frac{tan^2\theta_m}{\alpha^2}\right)^2} =
 \frac{\alpha^2}{\pi\,(\alpha^2\,cos^2\theta_m + sin^2\theta_m)^2}
 $$
 
