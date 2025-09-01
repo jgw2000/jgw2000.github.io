@@ -357,8 +357,55 @@ $$
 
 表示当 $\frac{\alpha}{\lambda} \rightarrow \alpha$ 变为原来的 $\lambda$ 倍时，等价于斜率分布拉伸为原来的 $\lambda$ 倍，即斜率 $\left(\frac{x_{\tilde{m}}}{\lambda},\frac{y_{\tilde{m}}}{\lambda}\right)$ 拉伸到 $(x_{\tilde{m}},y_{\tilde{m}})$ 且概率降低为 $\frac{1}{\lambda^2}$。此时，遮挡函数只依赖于变量
 $$
-a = \frac{1}{\alpha tan\theta_o}
+a = \frac{1}{\alpha\,tan\theta_o}
 $$
 其中 $\frac{1}{tan\theta_o}$ 表示出射方向的斜率
 
-[^1]: [Slope Space in BRDF Theory](https://www.reedbeta.com/blog/slope-space-in-brdf-theory/)
+## 一些常见的分布函数 NDF
+### Beckmann
+Beckmann 的斜率满足二维独立高斯分布和形状不变性，表示为
+$$
+P^{22}(x_{\tilde{m}},y_{\tilde{m}},\sigma) = \frac{1}{2\pi\sigma^2}exp\left(-\frac{x_{\tilde{m}}^2+y_{\tilde{m}}^2}{2\sigma^2}\right)
+$$
+
+则法线分布等于
+$$
+D(\omega_m,\sigma) = \frac{1}{2\pi\sigma^2\,cos^4\theta_m}exp\left(-\frac{tan^2\theta_m}{2\sigma^2}\right)
+$$
+
+令粗糙度参数 $\alpha = \sqrt{2}\,\sigma$，可得
+::: tip
+$$
+D(\omega_m,\alpha) = \frac{1}{\pi\alpha^2\,cos^4\theta_m}exp\left(-\frac{tan^2\theta_m}{\alpha^2}\right)
+$$
+:::
+
+### GGX
+GGX 的斜率满足二维独立 T 分布[^2]和形状不变性（T 分布是高斯分布的一般化形式并且具有更长的拖尾，当自由度 $v \rightarrow  \infty$ 时，T 分布趋向于高斯分布），表示为
+$$
+P^{22}(x_{\tilde{m}},y_{\tilde{m}}) = \frac{1}{\pi\alpha^2\left(1+\frac{x^2_{\tilde{m}}+y^2_{\tilde{m}}}{\alpha^2}\right)^2}
+$$
+
+则法线分布等于
+$$
+D(\omega_m) = \frac{1}{\pi\alpha^2\,cos^4\theta_m\left(1+\frac{tan^2\theta_m}{\alpha^2}\right)^2} =
+\frac{\alpha^2}{\pi\,(\alpha^2\,cos^2\theta_m + sin^2\theta_m)^2}
+$$
+
+$\Lambda$ 函数等于
+$$
+\Lambda(\omega_o) = \frac{-1+\sqrt{1+\frac{1}{a^2}}}{2} \quad \text{其中 } a=\frac{1}{\alpha\,tan\theta_o}
+$$
+
+遮挡函数等于
+$$
+\begin{aligned}
+G_1(\omega_o,\omega_m) &= \frac{1}{1+\Lambda(\omega_o)} = \frac{2}{1+\sqrt{1+\frac{1}{a^2}}} \\
+&= \frac{2}{1+\sqrt{1+\alpha^2\,tan^2\theta_o}} \\
+&= \frac{2\,cos\theta_o}{cos\theta_o+\sqrt{cos^2\theta_o+\alpha^2\,sin^2\theta_o}} \\
+&= \frac{2\,cos\theta_o}{cos\theta_o+\sqrt{\alpha^2+(1-\alpha^2)\,cos^\theta_o}}
+\end{aligned}
+$$
+
+[^1]: [Slope Space in BRDF Theory](https://www.reedbeta.com/blog/slope-space-in-brdf-theory)
+[^2]: [Student's T distribution](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
