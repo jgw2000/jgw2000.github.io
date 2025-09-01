@@ -403,9 +403,31 @@ $$
 G_1(\omega_o,\omega_m) &= \frac{1}{1+\Lambda(\omega_o)} = \frac{2}{1+\sqrt{1+\frac{1}{a^2}}} \\
 &= \frac{2}{1+\sqrt{1+\alpha^2\,tan^2\theta_o}} \\
 &= \frac{2\,cos\theta_o}{cos\theta_o+\sqrt{cos^2\theta_o+\alpha^2\,sin^2\theta_o}} \\
-&= \frac{2\,cos\theta_o}{cos\theta_o+\sqrt{\alpha^2+(1-\alpha^2)\,cos^\theta_o}}
+&= \frac{2\,cos\theta_o}{cos\theta_o+\sqrt{\alpha^2+(1-\alpha^2)\,cos^2\theta_o}}
+\end{aligned}
+$$
+
+::: info
+在 Disney PBR[^3] 模型中，计算法线分布函数 D 时，使用粗糙度参数 $\alpha=r^2$；计算遮挡函数 G 时，使用粗糙度参数 $\alpha = (0.5 + r/2)^2$，将 $\alpha$ 从 [0,1] 重新映射到 [0.5,1]，避免过量的高光
+:::
+
+根据高度相关的联合遮挡函数定义可得
+$$
+\begin{aligned}
+G_2(\omega_i,\omega_o,\omega_m) &= \frac{1}{1+\Lambda(\omega_i)+\Lambda(\omega_o)} \\
+&= \frac{1}{1+\frac{-1+\sqrt{1+\alpha^2\,tan^2\theta_i}}{2}+\frac{-1+\sqrt{1+\alpha^2\,tan^2\theta_o}}{2}} \\
+&= \frac{2}{\sqrt{1+\alpha^2\,tan^2\theta_i}+\sqrt{1+\alpha^2\,tan^2\theta_o}}
+\end{aligned}
+$$
+
+则
+$$
+\begin{aligned}
+\frac{G_2(\omega_i,\omega_o,\omega_m)}{4\,cos\theta_i\,cos\theta_o} &= \frac{0.5}{cos\theta_i\,cos\theta_o\,(\sqrt{1+\alpha^2\,tan^2\theta_i}+\sqrt{1+\alpha^2\,tan^2\theta_o})} \\
+&= \frac{0.5}{cos\theta_o\sqrt{\alpha^2+(1-\alpha^2)cos^2\theta_i}+cos\theta_i\sqrt{\alpha^2+(1-\alpha^2)cos^2\theta_o}}
 \end{aligned}
 $$
 
 [^1]: [Slope Space in BRDF Theory](https://www.reedbeta.com/blog/slope-space-in-brdf-theory)
 [^2]: [Student's T distribution](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
+[^3]: [Physically Based Shading at Disney](https://blog.selfshadow.com/publications/s2012-shading-course/burley/s2012_pbs_disney_brdf_notes_v3.pdf)
