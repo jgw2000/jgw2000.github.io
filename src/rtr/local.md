@@ -29,7 +29,11 @@ tag:
 
 ## 球谐函数
 ### 定义
-球鞋函数在球面域 $S$ 上定义了一组标准正交基，使用参数 $s = (x,y,z) = (sin\theta\,cos\varphi,sin\theta\,sin\varphi,cos\theta)$，基函数定义为
+球谐函数在球面域 $S$ 上定义了一组标准正交基，使用参数 
+$$
+s = (x,y,z) = (sin\theta\,cos\varphi,sin\theta\,sin\varphi,cos\theta)
+$$
+基函数定义为
 $$
 Y_l^m(\theta,\varphi) = K_l^m\,e^{im\varphi}\,P_l^{|m|}(cos\theta), \quad l \in N, \, -l \le m \le l
 $$
