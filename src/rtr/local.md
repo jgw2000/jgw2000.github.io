@@ -210,10 +210,13 @@ $$
 pdf(l_k,v) = \frac{D(h)|n\cdot h|}{4|v\cdot h|}
 $$
 
-代入上式
+综上
 ::: tip
 $$
-\int_H f(l,v)\,cos\theta_l\,dl \approx F_0\,\Big(\frac{1}{N}\sum_{k=1}^N \frac{G(l_k,v)\cdot|v\cdot h|\cdot (1 - (1 - v\cdot h)^5)}{|n\cdot h||n\cdot v|}\Big) + \frac{1}{N}\sum_{k=1}^N\frac{G(l_k,v)\cdot|v\cdot h|\cdot(1-v\cdot h)^5}{|n\cdot h||n\cdot v|}
+\begin{aligned}
+\frac{\int_H L_i(l)\,dl}{dl} &\approx \frac{1}{N} \sum_{k=1}^N L_i(l_k)\\
+\int_H f(l,v)\,cos\theta_l\,dl &\approx F_0\,\Big(\frac{1}{N}\sum_{k=1}^N \frac{G(l_k,v)\cdot|v\cdot h|\cdot (1 - (1 - v\cdot h)^5)}{|n\cdot h||n\cdot v|}\Big) + \frac{1}{N}\sum_{k=1}^N\frac{G(l_k,v)\cdot|v\cdot h|\cdot(1-v\cdot h)^5}{|n\cdot h||n\cdot v|}
+\end{aligned}
 $$
 :::
 
