@@ -217,9 +217,9 @@ $$
 $$
 :::
 
-### Diffuse IBL
-
 
 参考
-[^1]: [Real Shading in Unreal Engine 4](https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf)
-[^2]: [Image Based Lighting with Multiple Scattering](https://bruop.github.io/ibl/)
+<br>
+[Real Shading in Unreal Engine 4](https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf)
+<br>
+[Image Based Lighting with Multiple Scattering](https://bruop.github.io/ibl/)
