@@ -155,4 +155,71 @@ $$
 ### 立方体映射
 可以直接使用反射向量 $r=(r_x,r_y,r_z)$ 作为纹理坐标进行访问
 
-## Specular IBL
+## IBL
+当使用环境贴图来表示环境光时，需要使用渲染方程积分来计算光照信息，可以用蒙特卡洛估计
+$$
+\int_H L_i(l)\,f(l,v)\,cos\theta_l\,dl \approx \frac{1}{N}\sum_{k=1}^N \frac{L_i(l_k)\,f(l_k,v)\,cos\theta_{l_k}}{p(l_k,v)}
+$$
+
+即使使用重要性采样，该方法仍然需要很多次采样计算，为了进一步减少计算代价，可以使用 Split Sum 近似
+
+::: info
+一个重要的近似公式
+$$
+\int_\Omega f(x)\,g(x)\,dx \approx \underbrace{\frac{\int_{\Omega_G} f(x)\,dx}{\int_{\Omega_G} dx}}_{f\,在积分域\, \Omega_G\,的平均值} \cdot \int_\Omega g(x)\,dx
+$$
+
+在什么情况下是准确的？
+- 积分域 $\Omega_G$ 足够小
+- 函数 $g$ 在积分域 $\Omega_G$ 上足够光滑（即变化波动小）
+
+BRDF 恰好满足条件！
+:::
+
+::: tip Split Sum 近似
+$$
+\frac{1}{N}\sum_{k=1}^N \frac{L_i(l_k)\,f(l_k,v)\,cos\theta_{l_k}}{p(l_k,v)} \approx \left(\frac{1}{N}\sum_{k=1}^N L_i(l_k)\right)\,\left(\frac{1}{N}\sum_{k=1}^N \frac{f(l_k,v)\,cos\theta_{l_k}}{p(l_k,v)}\right)
+$$
+:::
+
+### Sepcular IBL
+如果 BRDF 是 glossy 的，此时满足条件积分域 $\Omega_G$ 足够小，则有
+$$
+\int_H L_i(l)\,f(l,v)\,cos\theta_l\,dl \approx \underbrace{\frac{\int_{H}L_i(l)\,dl}{dl}}_{对环境贴图作\, prefilter} \underbrace{\int_H f(l,v)\,cos\theta_l\,dl}_{预计算 \,LUT}
+$$
+
+$$
+\begin{aligned}
+\int_H f(l,v)\,cos\theta_l\,dl &= F_0\int_H\frac{f(l,v)}{F(v,h)}\Big(1 - (1 - v\cdot h)^5\Big)\,cos\theta_l\,dl + \int_H \frac{f(l,v)}{F(v,h)}(1-v\cdot h)^5\,cos\theta_l\,dl \\
+& \approx F_0\,\Big(\frac{1}{N}\sum_{k=1}^N \frac{D(h_k)\cdot G(l_k,v)\cdot (1 - (1 - v\cdot h)^5)\,|n\cdot l|}{4|n\cdot l||n\cdot v|\,p(l_k,v)}\Big) + \frac{1}{N}\sum_{k=1}^N \frac{D(h_k)\cdot G(l_k,v)\cdot (1 - v\cdot h)^5\,|n\cdot l|}{4|n\cdot l||n\cdot v|\,p(l_k,v)}
+\end{aligned}
+$$
+
+我们使用重要性采样 $D(h)|n\cdot h|$，这是因为
+$$
+\int_\Omega D(h)|n\cdot h|\,dh = 1
+$$
+
+又我们要对 $l$ 进行采样而不是 $h$ ，因此需要使用 Jacobian 变换
+$$
+J(h) = \frac{1}{4|v\cdot h|}
+$$
+
+可得
+$$
+pdf(l_k,v) = \frac{D(h)|n\cdot h|}{4|v\cdot h|}
+$$
+
+代入上式
+::: tip
+$$
+\int_H f(l,v)\,cos\theta_l\,dl \approx F_0\,\Big(\frac{1}{N}\sum_{k=1}^N \frac{G(l_k,v)\cdot|v\cdot h|\cdot (1 - (1 - v\cdot h)^5)}{|n\cdot h||n\cdot v|}\Big) + \frac{1}{N}\sum_{k=1}^N\frac{G(l_k,v)\cdot|v\cdot h|\cdot(1-v\cdot h)^5}{|n\cdot h||n\cdot v|}
+$$
+:::
+
+### Diffuse IBL
+
+
+参考
+[^1]: [Real Shading in Unreal Engine 4](https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf)
+[^2]: [Image Based Lighting with Multiple Scattering](https://bruop.github.io/ibl/)
