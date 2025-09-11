@@ -195,7 +195,19 @@ $$
 \end{aligned}
 $$
 
-我们使用重要性采样 $D(h)|n\cdot h|$，这是因为
+#### 1. Prefilter
+在 [Real Shading in Unreal Engine 4](https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf) 中，使用 GGX 重要性采样来进行蒙特卡洛估计，并且使用 $n\cdot l$ 做加权平均，即
+$$
+\frac{\int_H L_i(l)\,dl}{dl} \approx \frac{1}{\sum_{k=1}^N |n\cdot l_k|} \sum_{k=1}^N L_i(l_k)\,|n\cdot l_k|
+$$
+
+::: caution
+由于 GGX 采样分布依赖于观察方向，而此处默认使用 $n = v = r$ 的观察方向来进行采样，因此导致在 grazing angle 处得到的反射不够充分
+:::
+
+#### 2. BRDF LUT
+
+同样使用重要性采样 $D(h)|n\cdot h|$，这是因为
 $$
 \int_\Omega D(h)|n\cdot h|\,dh = 1
 $$
@@ -213,16 +225,14 @@ $$
 综上
 ::: tip
 $$
-\begin{aligned}
-\frac{\int_H L_i(l)\,dl}{dl} &\approx \frac{1}{N} \sum_{k=1}^N L_i(l_k)\\
-\int_H f(l,v)\,cos\theta_l\,dl &\approx F_0\,\Big(\frac{1}{N}\sum_{k=1}^N \frac{G(l_k,v)\cdot|v\cdot h|\cdot (1 - (1 - v\cdot h)^5)}{|n\cdot h||n\cdot v|}\Big) + \frac{1}{N}\sum_{k=1}^N\frac{G(l_k,v)\cdot|v\cdot h|\cdot(1-v\cdot h)^5}{|n\cdot h||n\cdot v|}
-\end{aligned}
+\int_H f(l,v)\,cos\theta_l\,dl \approx F_0\,\Big(\frac{1}{N}\sum_{k=1}^N \frac{G(l_k,v)\cdot|v\cdot h|\cdot (1 - (1 - v\cdot h)^5)}{|n\cdot h||n\cdot v|}\Big) + \frac{1}{N}\sum_{k=1}^N\frac{G(l_k,v)\cdot|v\cdot h|\cdot(1-v\cdot h)^5}{|n\cdot h||n\cdot v|}
 $$
 :::
-
 
 参考
 <br>
 [Real Shading in Unreal Engine 4](https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf)
 <br>
 [Image Based Lighting with Multiple Scattering](https://bruop.github.io/ibl/)
+<br>
+[Diffuse Irradiance](https://learnopengl.com/PBR/IBL/Diffuse-irradiance)
