@@ -255,7 +255,7 @@ Y_{00}(\theta,\phi) \quad &= \quad 0.282095 \\
 (Y_{11};Y_{10};Y_{1-1})(\theta,\phi) \quad &= \quad 0.488603(x;z;y) \\
 (Y_{21};Y_{2-1};Y_{2-2})(\theta,\phi) \quad &= \quad 1.092548(xz;yz;xy) \\
 Y_{20}(\theta,\phi) \quad &= \quad 0.315392(3z^2-1) \\
-Y_{00}(\theta,\phi) \quad &= \quad 0.546274(x^2-y^2)
+Y_{22}(\theta,\phi) \quad &= \quad 0.546274(x^2-y^2)
 \end{aligned}
 $$
 
