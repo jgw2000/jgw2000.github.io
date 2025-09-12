@@ -298,7 +298,7 @@ $$
 \begin{aligned}
 l = 1 \quad & \hat{A_l} = \frac{2\pi}{3} \\
 l > 1,odd \quad & \hat{A_l} = 0 \\
-l even \quad & \hat{A_l} = 2\pi\frac{(-1)^{\frac{l}{2}-1}}{(l+2)(l-1)}\Big[\frac{l!}{2^l(\frac{l}{2}!)^2}\Big]
+l,even \quad & \hat{A_l} = 2\pi\frac{(-1)^{\frac{l}{2}-1}}{(l+2)(l-1)}\Big[\frac{l!}{2^l(\frac{l}{2}!)^2}\Big]
 \end{aligned}
 $$
 
@@ -318,7 +318,7 @@ l = 2 \quad & -2 \le m \le 2
 $$
 :::
 
-：：：info Prefiltering
+::: info Prefiltering
 给定任意环境贴图，我们需要计算出前 9 个光照系数 $L_{lm}, \; l\le 2$
 $$
 L_{lm} = \int_{\theta=0}^{\frac{\pi}{2}}\int_{\phi=0}^{2\pi}L(\theta,\phi)Y_{lm}(\theta,\phi)\,sin\theta\,d\theta\,d\phi
