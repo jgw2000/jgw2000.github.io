@@ -229,6 +229,133 @@ $$
 $$
 :::
 
+### Diffuse IBL
+#### 1. Irradiance environment map
+$$
+\begin{aligned}
+L_o(p,\omega_o) &= k_d\frac{c}{\pi}\int_{\Omega} L_i(p,\omega_i)\,|n\cdot \omega_i|\,d\omega_i \\
+L_o(p,\phi_o,\theta_o) &= k_d\frac{c}{\pi}\int_{\phi=0}^{2\pi}\int_{\theta=0}^{\frac{1}{2}\pi} L_i(p,\phi_i,\theta_i)\,cos\theta\,sin\theta\,d\phi\,d\theta
+\end{aligned}
+$$
+
+使用黎曼和近似估计，将 $\phi$ 划分成 $n_1$ 份，将 $\theta$ 划分成 $n_2$ 份，则
+$$
+\begin{aligned}
+L_o(p,\phi_o,\theta_o) &\approx k_d\frac{c}{\pi} \sum_{\phi=0}^{n_1}\sum_{\theta=0}^{n_2} \frac{2\pi}{n_1}\frac{\frac{1}{2}\pi}{n_2} L_i(p,\phi_i,\theta_i)\,cos\theta\,sin\theta \\
+&= k_d\frac{c\pi}{n_1n_2} \sum_{\phi=0}^{n_1}\sum_{\theta=0}^{n_2} L_i(p,\phi_i,\theta_i)\,cos\theta\,sin\theta
+\end{aligned}
+$$
+
+#### 2. Spherical harmonics
+球谐系数 $Y_{lm}$ 中的前 9 个可以预先计算得到，具体如下
+$$
+\begin{aligned}
+(x,y,z) \quad &= \quad (sin\theta\,cos\phi,sin\theta\,sin\phi,cos\theta) \\
+Y_{00}(\theta,\phi) \quad &= \quad 0.282095 \\
+(Y_{11};Y_{10};Y_{1-1})(\theta,\phi) \quad &= \quad 0.488603(x;z;y) \\
+(Y_{21};Y_{2-1};Y_{2-2})(\theta,\phi) \quad &= \quad 1.092548(xz;yz;xy) \\
+Y_{20}(\theta,\phi) \quad &= \quad 0.315392(3z^2-1) \\
+Y_{00}(\theta,\phi) \quad &= \quad 0.546274(x^2-y^2)
+\end{aligned}
+$$
+
+又
+$$
+E(n) = \int_{\Omega(n)} L(\omega)\,(n\cdot \omega)\,d\omega
+$$
+其中 $E$ 和 $L$ 可以通过球谐函数系数来表示
+$$
+\begin{aligned}
+L(\theta,\phi) &= \sum_{l,m} L_{lm}Y_{lm}(\theta,\phi) \\
+E(\theta,\phi) &= \sum_{l,m} E_{lm}Y_{lm}(\theta,\phi)
+\end{aligned}
+$$
+
+我们定义 $A=(n\cdot\omega)$，由于 $A$ 没有方位角 $\phi$ 依赖，$m=0$ 因此我们可以只使用 $l$ 索引
+$$
+A(\theta) = max[cos\theta,0] = \sum_l A_lY_{l0}(\theta)
+$$
+
+可以证明
+$$
+E_{lm} = \sqrt{\frac{4\pi}{2l+1}} A_lL_{lm}
+$$
+
+为了方便，我们定义一个新的变量
+$$
+\hat{A_l} = \sqrt{\frac{4\pi}{2l+1}}A_l
+$$
+
+综上
+::: tip
+$$
+E(\theta,\phi) = \sum_{l,m} \hat{A_l} L_{lm}Y_{lm}(\theta,\phi)
+$$
+:::
+
+::: info
+$$
+\begin{aligned}
+l = 1 \quad & \hat{A_l} = \frac{2\pi}{3} \\
+l > 1,odd \quad & \hat{A_l} = 0 \\
+l even \quad & \hat{A_l} = 2\pi\frac{(-1)^{\frac{l}{2}-1}}{(l+2)(l-1)}\Big[\frac{l!}{2^l(\frac{l}{2}!)^2}\Big]
+\end{aligned}
+$$
+
+可以计算出前几项
+$$
+\hat{A_0} = 3.141593 \quad \hat{A_1} = 2.094395 \quad \hat{A_2} = 0.785398 \\
+\hat{A_3} = 0 \quad \hat{A_4} = -0.130900 \quad \hat{A_5} = 0 \quad \hat{A_6} = 0.049087
+$$
+
+可以看到 $\hat{A_l}$ 衰减的非常快，对于近似估计我们只需要考虑低频的光照系数（$l \le 2$）。同样的，Irradiance 只需要 9 个参数就可以得到很好的近似估计，即
+$$
+\begin{aligned}
+l = 0 \quad & m = 0 \\
+l = 1 \quad & -1 \le m \le 1 \\
+l = 2 \quad & -2 \le m \le 2
+\end{aligned}
+$$
+:::
+
+：：：info Prefiltering
+给定任意环境贴图，我们需要计算出前 9 个光照系数 $L_{lm}, \; l\le 2$
+$$
+L_{lm} = \int_{\theta=0}^{\frac{\pi}{2}}\int_{\phi=0}^{2\pi}L(\theta,\phi)Y_{lm}(\theta,\phi)\,sin\theta\,d\theta\,d\phi
+$$
+:::
+
+::: info Rendering
+得到光照系数 $L_{lm}$ 后，可以使用如下公式计算 Irradiance
+$$
+E(n) = n^t M n
+$$
+$$
+M =
+\begin{pmatrix}
+c_1L_{22} & c_1L_{2-2} & c_1L_{21} & c_2L_{11} \\
+c_1L_{2-2} & -c_1L_{22} & c_1L_{2-1} & c_2L_{1-1} \\
+c_1L_{21} & c_1L_{2-1} & c_3L_{20} & c_2L_{10} \\
+c_2L_{11} & c_2L_{1-1} & c_2L_{10} & c_4L_{00}-c_5L_{20}
+\end{pmatrix}
+$$
+
+$$
+c_1 = 0.429043 \quad c_2 = 0.511664 \\
+c_3 = 0.743125 \quad c_4 = 0.886227 \quad c_5 = 0.247708
+$$
+
+对于未优化矩阵操作的系统，也可以使用如下公式计算
+$$
+\begin{aligned}
+E(n) &= c_1L_{22}(x^2 - y^2) + c_3L_{20}z^2 + c_4L_{00} - c_5L_{20} \\
+&+ 2c_1(L_{2-2}xy + L_{21}xz + L_{2-1}yz) \\
+&+ 2c_2(L_{11}x + L_{1-1}y + L_{10} z)
+\end{aligned}
+$$
+:::
+
+
 参考
 <br>
 [Real Shading in Unreal Engine 4](https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf)
