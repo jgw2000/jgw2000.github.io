@@ -108,6 +108,8 @@ $$
 环境映射将一个球面函数记录到一个或多个纹理中，可以表达任意高频率的球面信号（通过提高纹理分辨率）以及精确捕捉任意范围的环境辐射度（通过提高每个通道的位数）
 :::
 
+![](/rtr/images/local_1.png)
+
 反射映射是其中最基本的一种，其假定 BRDF 是一个完美的镜面，反射方程可以简化为
 $$
 L_o(v) = F(n,r)L_i(r)
@@ -134,6 +136,9 @@ $$
 $$
 
 ### 球面映射
+
+![](/rtr/images/local_2.png)
+
 球面映射将反射向量投影到球面的二维贴图上（即球面贴图），具体计算步骤如下：
 - 根据反射向量 $r$ 和观察方向 $v$ 计算出对应的球面法线 $n$, 在球面空间中 $v$ 固定等于 $(0,0,1)$， 则
   $$
@@ -183,6 +188,9 @@ $$
 :::
 
 ### Sepcular IBL
+
+![](/rtr/images/local_3.png)
+
 如果 BRDF 是 glossy 的，此时满足条件积分域 $\Omega_G$ 足够小，则有
 $$
 \int_H L_i(l)\,f(l,v)\,cos\theta_l\,dl \approx \underbrace{\frac{\int_{H}L_i(l)\,dl}{dl}}_{对环境贴图作\, prefilter} \underbrace{\int_H f(l,v)\,cos\theta_l\,dl}_{预计算 \,LUT}
@@ -231,6 +239,9 @@ $$
 
 ### Diffuse IBL
 #### 1. Irradiance environment map
+
+![](/rtr/images/local_4.png)
+
 $$
 \begin{aligned}
 L_o(p,\omega_o) &= k_d\frac{c}{\pi}\int_{\Omega} L_i(p,\omega_i)\,|n\cdot \omega_i|\,d\omega_i \\
