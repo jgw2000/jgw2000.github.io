@@ -50,7 +50,7 @@ $$
 T_r(x_a, x_b) = e^{-\tau},\quad \text{where} \quad \tau = \int_{x=x_a}^{x_b} \sigma_t(x) \|dx\|
 $$
 
-![](/rtr/images/volume_3.png)
+![](/rtr/images/volume_4.png)
 
 ### 散射事件
 $$
@@ -75,7 +75,7 @@ shadowMap 表示来自不透明对象的遮挡，volShad 表示在 volume 中的
 :::
 
 ### 相位函数
-![](/rtr/images/volume_3.png)
+![](/rtr/images/volume_5.png)
 如图所示，相位函数在宏观层面上描述了散射方向的概率和分布，根据能量守恒原则，相位函数在单位球面上的积分必须等于 1；下面是最简单的相位函数，该函数是各向同性的，其在所有方向上均匀散射
 $$
 p(\theta) = \frac{1}{4\pi}
@@ -94,7 +94,7 @@ $$
 
 Rayleigh 散射的相位函数在极坐标下的图示如下，相对于光的方向有前向散射和后向散射两个部分
 
-![](/rtr/images/volume_3.png)
+![](/rtr/images/volume_6.png)
 
 具体可以表示为
 $$
@@ -122,7 +122,7 @@ $$
 
 g < 0 表示后向散射，g = 0 表示各向同性，g > 0 表示前向散射
 
-![](/rtr/images/volume_3.png)
+![](/rtr/images/volume_7.png)
 
 Schlick 相位函数是比 HG 更快的一个近似函数，表示为
 $$
