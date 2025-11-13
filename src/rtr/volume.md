@@ -134,3 +134,68 @@ $$
 :::
 
 几何散射发生在粒子尺寸明显大于光的波长的情况下，此时，光可以在每个粒子内部发生折射和反射，在宏观层面上需要一个复杂的散射相位函数来模拟；光的偏振也会影响这种类型的散射，例如现实生活中的视觉彩虹效应，这种效应是由空气中水滴内部对光的反射引起的，它将太阳光分散成可见光谱，并在小角度的后向散射范围内形成可见的彩虹。
+
+## 天空渲染
+参考
+<br>
+[Display of The Earth Taking into Account Atmospheric Scattering](http://nishitalab.org/user/nis/cdrom/sig93_nis.pdf)
+<br>
+[GPU Gems2 : Accurate Atmospheric Scattering](https://developer.nvidia.com/gpugems/gpugems2/part-ii-shading-lighting-and-shadows/chapter-16-accurate-atmospheric-scattering)
+
+### 大气散射
+首先考虑单次散射的情况，假设 $I_0(\lambda)$ 表示入射光的强度，$I(\lambda,\theta)$ 表示经过粒子散射之后，在偏移 $\theta$ 角度的方向的出射光的强度，有：
+$$
+\begin{aligned}
+I(\lambda,\theta) &= I_0(\lambda)\,K\rho\,F_r(\theta) / \lambda^4 \\[5px]
+K&= \frac{2\pi^2(n^2-1)^2}{3N_s} \\[5px]
+\end{aligned}
+$$
+
+::: info
+$K$ 表示标准大气压下的常量（表示在海平面的分子密度），$n$ 表示空气的折射率，$N_s$ 表示标准大气压下的分子数量密度，$\rho$ 表示密度比并且依赖于海拔高度 $h$（$\rho = 1$ 表示在海平面）
+$$
+\rho = e^{-\frac{h}{H_0}}
+$$
+其中 $H_0$ 表示大气层的厚度（分子密度不变的情况下）, 气溶胶和空气分子的密度都是随着海拔高度而指数减少，但是减少的速度不同。气溶胶的大气层厚度 $H_0$ 可以设置成 1.2km，空气分子的大气层厚度 $H_0$ 可以设置成 7994m
+:::
+
+$F_r(\theta)$ 表示相位函数，下面是一种改进后的 HG 函数 
+$$
+F(\theta,g) = \frac{3(1-g^2)}{2(2+g^2)}\frac{(1+cos^2\theta)}{(1+g^2-2g\,cos\theta)^{3/2}}
+$$
+
+当 $g = 0$ 时等价于 Rayleigh 散射
+
+衰减系数 $\beta$（即单位长度下的消光比）由以下公式给出：
+$$
+\beta = \frac{8\pi^3(n^2-1)^2}{3N_s\lambda^4} = \frac{4\pi K}{\lambda^4}
+$$
+
+为了计算波长为 $\lambda$ 的光在传输 $S$ 距离的过程中由于散射和吸收所导致的衰减，可以使用光学深度来进行，可以由以下公式表示：
+$$
+t(S,\lambda) = \int_0^S \beta(s)\,\rho(s)\,ds = \frac{4\pi K}{\lambda^4}\int_0^S\rho(s)\,ds
+$$
+
+
+### 公式和计算
+假设地面某一处观察点 $P_v$，观察方向是 $v$，该视线与大气层的交点分别是 $P_a$ 和 $P_b$，考虑 $P_a$ 和 $P_b$ 之间任意一点 $P$，太阳光经过大气层衰减后到达 $P$ 点时的强度等于
+$$
+I_s(\lambda)\,e^{-t(PP_c,\lambda)}
+$$
+经过单次散射后在 $v$ 方向的出射光强度等于
+$$
+I_p(\lambda) = I_s(\lambda)\,e^{-t(PP_c,\lambda)}\,K\rho\,F_r(\theta)\frac{1}{\lambda^4}
+$$
+再经过大气层衰减到达观察点 $P_v$ 时的光强度等于
+$$
+I_{pv}(\lambda) = I_p(\lambda)\,e^{-t(PP_v, \lambda)}
+$$
+
+太阳光可以视为是平行光，对 $P_a$ 和 $P_b$ 之间进行积分可以得到总的光强度
+$$
+\begin{aligned}
+I_v(\lambda) &= \int_{P_a}^{P_b} I_{pv}(\lambda)\,ds \\
+&= \int_{P_a}^{P_b} I_s(\lambda)\,e^{-t(PP_c,\lambda)}\,K\rho\,F_r(\theta)\frac{1}{\lambda^4}\,e^{-t(PP_v,\lambda)}\,ds \\
+&= I_s(\lambda)\frac{K\,F_r(\theta)}{\lambda^4}\int_{P_a}^{P_b}\rho\,e^{-t(PP_c,\lambda)-t(PP_v,\lambda)}\,ds
+\end{aligned}
+$$
