@@ -140,62 +140,58 @@ $$
 <br>
 [Display of The Earth Taking into Account Atmospheric Scattering](http://nishitalab.org/user/nis/cdrom/sig93_nis.pdf)
 <br>
-[GPU Gems2 : Accurate Atmospheric Scattering](https://developer.nvidia.com/gpugems/gpugems2/part-ii-shading-lighting-and-shadows/chapter-16-accurate-atmospheric-scattering)
+[Allan Zucconi: Volumetric Atmospheric Scattering](https://www.alanzucconi.com/2017/10/10/atmospheric-scattering-1/)
 
-### 大气散射
-首先考虑单次散射的情况，假设 $I_0(\lambda)$ 表示入射光的强度，$I(\lambda,\theta)$ 表示经过粒子散射之后，在偏移 $\theta$ 角度的方向的出射光的强度，有：
+### 透射函数 Transmittance Function
+![](https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_11b-700x321.png)
+
+$$
+T(\overline{CP}) = \frac{I_P}{I_C}
+$$
+
+### 散射函数 Scattering Function
+![](https://www.alanzucconi.com/wp-content/uploads/2017/10/scattering_06a-700x329.png)
+
 $$
 \begin{aligned}
-I(\lambda,\theta) &= I_0(\lambda)\,K\rho\,F_r(\theta) / \lambda^4 \\[5px]
-K&= \frac{2\pi^2(n^2-1)^2}{3N_s} \\[5px]
+I_{PA} &= \boxed{I_P}\,S(\lambda,\theta,h)\,T(\overline{PA}) \\[10px]
+&= \boxed{I_C\,T(\overline{CP})}\,S(\lambda,\theta,h)\,T(\overline{PA}) \\[10px]
+&= \underbrace{I_C\,S(\lambda,\theta,h)}_{in-scattering}\; \underbrace{T(\overline{CP})\,T(\overline{PA})}_{out_scattering}
 \end{aligned}
 $$
 
-::: info
-$K$ 表示标准大气压下的常量（表示在海平面的分子密度），$n$ 表示空气的折射率，$N_s$ 表示标准大气压下的分子数量密度，$\rho$ 表示密度比并且依赖于海拔高度 $h$（$\rho = 1$ 表示在海平面）
+### 散射公式
+![](https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_12-700x255.png)
 $$
-\rho = e^{-\frac{h}{H_0}}
+\begin{aligned}
+I_A &= \sum_{P\in\overline{AB}} \boxed{I_{PA}}\,ds \\[10px]
+&= \sum_{P\in\overline{AB}} \boxed{I_C\,S(\lambda,\theta,h)\,T(\overline{CP})\,T(\overline{PA})}\,ds \\[10px]
+&= I_S\,\sum_{P\in\overline{AB}} S(\lambda,\theta,h)\,T(\overline{CP})\,T(\overline{PA})\,ds
+\end{aligned}
 $$
-其中 $H_0$ 表示大气层的厚度（分子密度不变的情况下）, 气溶胶和空气分子的密度都是随着海拔高度而指数减少，但是减少的速度不同。气溶胶的大气层厚度 $H_0$ 可以设置成 1.2km，空气分子的大气层厚度 $H_0$ 可以设置成 7994m
+
+### Rayleigh 散射
+$$
+S(\lambda,\theta, h) = \frac{\pi^2(n^2-1)^2}{2}\,\underbrace{\frac{\rho(h)}{N}}_{density}\,\overbrace{\frac{1}{\lambda^4}}^{wavelength}\,\underbrace{1+cos^2\theta}_{geometry}
+$$
+
+其中：
+- $\lambda$: 入射光的波长
+- $\theta$: 散射角度
+- $h$: 海拔高度
+- $n=1.00029$：空气的折射率
+- $N=2.504·10^{25}$：标准大气压下的分子数量密度
+- $\rho(h)$：密度比，在海平面处等于 1
+
+### Rayleigh 散射系数
+$$
+\beta(\lambda,h) = \frac{8\pi^3(n^2-1)^2}{3}\,\frac{\rho(h)}{N}\,\frac{1}{\lambda^4}
+$$
+
+::: details 数学推导
+$$
+\begin{aligned}
+\beta(\lambda,h) = \int_0^{2\pi}\int_0^\pi S(\lambda,\theta,h)\,sin\theta\,d\theta\,d\phi
+\end{aligned}
+$$
 :::
-
-$F_r(\theta)$ 表示相位函数，下面是一种改进后的 HG 函数 
-$$
-F(\theta,g) = \frac{3(1-g^2)}{2(2+g^2)}\frac{(1+cos^2\theta)}{(1+g^2-2g\,cos\theta)^{3/2}}
-$$
-
-当 $g = 0$ 时等价于 Rayleigh 散射
-
-衰减系数 $\beta$（即单位长度下的消光比）由以下公式给出：
-$$
-\beta = \frac{8\pi^3(n^2-1)^2}{3N_s\lambda^4} = \frac{4\pi K}{\lambda^4}
-$$
-
-为了计算波长为 $\lambda$ 的光在传输 $S$ 距离的过程中由于散射和吸收所导致的衰减，可以使用光学深度来进行，可以由以下公式表示：
-$$
-t(S,\lambda) = \int_0^S \beta(s)\,\rho(s)\,ds = \frac{4\pi K}{\lambda^4}\int_0^S\rho(s)\,ds
-$$
-
-
-### 公式和计算
-假设地面某一处观察点 $P_v$，观察方向是 $v$，该视线与大气层的交点分别是 $P_a$ 和 $P_b$，考虑 $P_a$ 和 $P_b$ 之间任意一点 $P$，太阳光经过大气层衰减后到达 $P$ 点时的强度等于
-$$
-I_s(\lambda)\,e^{-t(PP_c,\lambda)}
-$$
-经过单次散射后在 $v$ 方向的出射光强度等于
-$$
-I_p(\lambda) = I_s(\lambda)\,e^{-t(PP_c,\lambda)}\,K\rho\,F_r(\theta)\frac{1}{\lambda^4}
-$$
-再经过大气层衰减到达观察点 $P_v$ 时的光强度等于
-$$
-I_{pv}(\lambda) = I_p(\lambda)\,e^{-t(PP_v, \lambda)}
-$$
-
-太阳光可以视为是平行光，对 $P_a$ 和 $P_b$ 之间进行积分可以得到总的光强度
-$$
-\begin{aligned}
-I_v(\lambda) &= \int_{P_a}^{P_b} I_{pv}(\lambda)\,ds \\
-&= \int_{P_a}^{P_b} I_s(\lambda)\,e^{-t(PP_c,\lambda)}\,K\rho\,F_r(\theta)\frac{1}{\lambda^4}\,e^{-t(PP_v,\lambda)}\,ds \\
-&= I_s(\lambda)\frac{K\,F_r(\theta)}{\lambda^4}\int_{P_a}^{P_b}\rho\,e^{-t(PP_c,\lambda)-t(PP_v,\lambda)}\,ds
-\end{aligned}
-$$
