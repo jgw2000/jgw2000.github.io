@@ -224,3 +224,39 @@ $$
 &= \frac{3}{16\pi}(1+cos^2\theta)
 \end{aligned}
 $$
+
+### 大气密度比
+$$
+\rho(h) = \frac{density(h)}{density(0)} = exp\Big\{-\frac{h}{H_0}\Big\}
+$$
+
+对于 Rayleigh 散射，$H_0 = 8500$ m；对于 Mie 散射， $H_0 = 1200$ m
+
+### 大气透射
+![](https://www.alanzucconi.com/wp-content/uploads/2017/09/scattering_10a-700x320.png)
+
+$$
+\begin{aligned}
+I_P &= \boxed{I_Q}\,exp\{-\beta(\lambda,h_1)\overline{QP}\} \\
+&= \boxed{I_S\,exp\{-\beta(\lambda,h_0)\overline{CQ}\}}\,exp\{-\beta(\lambda,h_1)\overline{QP}\} \\
+&= I_S\,exp\{-\beta(\lambda,h_0)\overline{CQ} - \beta(\lambda,h_1)\overline{QP}\}
+\end{aligned}
+$$
+
+如果 $\overline{CQ} = \overline{QP}$，则
+$$
+\begin{aligned}
+I_P &= I_S\,exp\Big\{-\boxed{(\beta(\lambda,h_0)+\beta(\lambda,h_1))\,ds}\Big\} \\[10px]
+&= I_S\,exp\Bigg\{-\boxed{\sum_{Q\in\overline{CP}} \beta(\lambda,h_Q)\,ds}\Bigg\}
+\end{aligned}
+$$
+
+由此可得，
+$$
+\begin{aligned}
+T(\overline{CP}) &= \frac{I_P}{I_S} = exp\Bigg\{-\sum_{Q\in\overline{CP}} \beta(\lambda,h_Q)\,ds\Bigg\} \\
+&= exp\Bigg\{-\sum_{Q\in\overline{CP}} \beta(\lambda,0)\,\rho(h_Q)\,ds\Bigg\} \\
+&= exp\Bigg\{-\beta(\lambda,0)\overbrace{\sum_{Q\in\overline{CP}} \rho(h_Q)\,ds}^{\text{optical depth } D(\overline{CP})}\Bigg\} \\
+&= exp\{-\beta(\lambda)\,D(\overline{CP})\}
+\end{aligned}
+$$
