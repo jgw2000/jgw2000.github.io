@@ -191,7 +191,36 @@ $$
 ::: details 数学推导
 $$
 \begin{aligned}
-\beta(\lambda,h) = \int_0^{2\pi}\int_0^\pi S(\lambda,\theta,h)\,sin\theta\,d\theta\,d\phi
+\beta(\lambda,h) &= \int_0^{2\pi}\int_0^\pi S(\lambda,\theta,h)\,sin\theta\,d\theta\,d\phi \\[10px]
+&= \int_0^{2\pi}\int_0^\pi \underbrace{\frac{\pi^2(n^2-1)^2}{2}\frac{\rho(h)}{N}\frac{1}{\lambda^4}}_{constant}(1+cos^2\theta)\,sin\theta\,d\theta\,d\phi \\[10px]
+&= \frac{\pi^2(n^2-1)^2}{2}\frac{\rho(h)}{N}\frac{1}{\lambda^4} \int_0^{2\pi} \boxed{\int_0^\pi (1+cos^2\theta)\,sin\theta\,d\theta}\,d\phi \\[10px]
+&= \frac{\pi^2(n^2-1)^2}{2}\frac{\rho(h)}{N}\frac{1}{\lambda^4} \int_0^{2\pi} \boxed{\frac{8}{3}}\,d\phi \\[10px]
+&= \frac{8\pi^3(n^2-1)^2}{3}\,\frac{\rho(h)}{N}\,\frac{1}{\lambda^4}
 \end{aligned}
 $$
 :::
+
+$$
+\begin{aligned}
+\beta(\lambda) = \beta(\lambda, 0) &= \frac{8\pi^3(n^2-1)^2}{3}\,\frac{1}{N}\,\frac{1}{\lambda^4} \\[20px]
+\beta(680nm) &= 0.00000519673 \\[5px]
+\beta(550nm) &= 0.0000121427 \\[5px]
+\beta(440nm) &= 0.0000296453 \\
+\end{aligned}
+$$
+
+### Rayleigh 相位函数
+原始的 Rayleigh 散射函数可以分解成两部分，一个表示 Rayleigh 散射系数，另一个表示 Rayleigh 相位函数：
+$$
+S(\lambda,\theta,h) = \beta(\lambda,h)\,\gamma(\theta)
+$$
+
+则
+
+$$
+\begin{aligned}
+\gamma(\theta) &= \frac{S(\lambda,\theta,h)}{\beta(\gamma)} \\[10px]
+&= \underbrace{\frac{\pi^2(n^2-1)^2}{2}\frac{\rho(h)}{N}\frac{1}{\lambda^4}\,(1+cos^2\theta)}_{S(\lambda,\theta,h)}\,\underbrace{\frac{3}{8\pi^3(n^2-1)^2}\frac{N}{\rho(h)}\,\lambda^4}_{\frac{1}{\beta(\lambda)}} \\[10px]
+&= \frac{3}{16\pi}(1+cos^2\theta)
+\end{aligned}
+$$
