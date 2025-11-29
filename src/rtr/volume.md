@@ -185,13 +185,13 @@ $$
 
 ### Rayleigh 散射系数
 $$
-\beta(\lambda,h) = \frac{8\pi^3(n^2-1)^2}{3}\,\frac{\rho(h)}{N}\,\frac{1}{\lambda^4}
+\beta_R(\lambda,h) = \frac{8\pi^3(n^2-1)^2}{3}\,\frac{\rho(h)}{N}\,\frac{1}{\lambda^4}
 $$
 
 ::: details 数学推导
 $$
 \begin{aligned}
-\beta(\lambda,h) &= \int_0^{2\pi}\int_0^\pi S(\lambda,\theta,h)\,sin\theta\,d\theta\,d\phi \\[10px]
+\beta_R(\lambda,h) &= \int_0^{2\pi}\int_0^\pi S(\lambda,\theta,h)\,sin\theta\,d\theta\,d\phi \\[10px]
 &= \int_0^{2\pi}\int_0^\pi \underbrace{\frac{\pi^2(n^2-1)^2}{2}\frac{\rho(h)}{N}\frac{1}{\lambda^4}}_{constant}(1+cos^2\theta)\,sin\theta\,d\theta\,d\phi \\[10px]
 &= \frac{\pi^2(n^2-1)^2}{2}\frac{\rho(h)}{N}\frac{1}{\lambda^4} \int_0^{2\pi} \boxed{\int_0^\pi (1+cos^2\theta)\,sin\theta\,d\theta}\,d\phi \\[10px]
 &= \frac{\pi^2(n^2-1)^2}{2}\frac{\rho(h)}{N}\frac{1}{\lambda^4} \int_0^{2\pi} \boxed{\frac{8}{3}}\,d\phi \\[10px]
@@ -202,24 +202,24 @@ $$
 
 $$
 \begin{aligned}
-\beta(\lambda) = \beta(\lambda, 0) &= \frac{8\pi^3(n^2-1)^2}{3}\,\frac{1}{N}\,\frac{1}{\lambda^4} \\[20px]
-\beta(680nm) &= 0.00000519673 \\[5px]
-\beta(550nm) &= 0.0000121427 \\[5px]
-\beta(440nm) &= 0.0000296453 \\
+\beta_R(\lambda) = \beta_R(\lambda, 0) &= \frac{8\pi^3(n^2-1)^2}{3}\,\frac{1}{N}\,\frac{1}{\lambda^4} \\[20px]
+\beta_R(680nm) &= 0.00000519673 \\[5px]
+\beta_R(550nm) &= 0.0000121427 \\[5px]
+\beta_R(440nm) &= 0.0000296453 \\
 \end{aligned}
 $$
 
 ### Rayleigh 相位函数
 原始的 Rayleigh 散射函数可以分解成两部分，一个表示 Rayleigh 散射系数，另一个表示 Rayleigh 相位函数：
 $$
-S(\lambda,\theta,h) = \beta(\lambda,h)\,\gamma(\theta)
+S_R(\lambda,\theta,h) = \beta_R(\lambda,h)\,\gamma_R(\theta)
 $$
 
 则
 
 $$
 \begin{aligned}
-\gamma(\theta) &= \frac{S(\lambda,\theta,h)}{\beta(\gamma)} \\[10px]
+\gamma_R(\theta) &= \frac{S(\lambda,\theta,h)}{\beta(\gamma)} \\[10px]
 &= \underbrace{\frac{\pi^2(n^2-1)^2}{2}\frac{\rho(h)}{N}\frac{1}{\lambda^4}\,(1+cos^2\theta)}_{S(\lambda,\theta,h)}\,\underbrace{\frac{3}{8\pi^3(n^2-1)^2}\frac{N}{\rho(h)}\,\lambda^4}_{\frac{1}{\beta(\lambda)}} \\[10px]
 &= \frac{3}{16\pi}(1+cos^2\theta)
 \end{aligned}
@@ -259,4 +259,25 @@ T(\overline{CP}) &= \frac{I_P}{I_S} = exp\Bigg\{-\sum_{Q\in\overline{CP}} \beta(
 &= exp\Bigg\{-\beta(\lambda,0)\overbrace{\sum_{Q\in\overline{CP}} \rho(h_Q)\,ds}^{\text{optical depth } D(\overline{CP})}\Bigg\} \\
 &= exp\{-\beta(\lambda)\,D(\overline{CP})\}
 \end{aligned}
+$$
+
+### Mie 散射系数
+$$
+\beta_M(h) = \frac{8\pi^3(n^2-1)^2}{3}\,\frac{\rho(h)}{N}
+$$
+
+### Mie 相位函数
+#### HG
+$$
+\gamma_M(\theta,g) = \frac{1}{4\pi}\frac{1-g^2}{(1+g^2-2g\,cos\theta)^{3/2}}
+$$
+
+#### HG Variant
+$$
+\gamma_M(\theta,g) = \frac{3}{8\pi}\frac{1-g^2}{2+g^2}\frac{1+cos^2\theta}{(1+g^2-2g\,cos\theta)^{3/2}}
+$$
+
+#### Schlick 近似
+$$
+\gamma_M(\theta,g) = \frac{1}{4\pi}\frac{1-g^2}{(1+g\,cos\theta)^2}
 $$
