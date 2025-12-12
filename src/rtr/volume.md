@@ -156,7 +156,7 @@ $$
 \begin{aligned}
 I_{PA} &= \boxed{I_P}\,S(\lambda,\theta,h)\,T(\overline{PA}) \\[10px]
 &= \boxed{I_C\,T(\overline{CP})}\,S(\lambda,\theta,h)\,T(\overline{PA}) \\[10px]
-&= \underbrace{I_C\,S(\lambda,\theta,h)}_{in-scattering}\; \underbrace{T(\overline{CP})\,T(\overline{PA})}_{out_scattering}
+&= \underbrace{I_C\,S(\lambda,\theta,h)}_{in-scattering}\; \underbrace{T(\overline{CP})\,T(\overline{PA})}_{out-scattering}
 \end{aligned}
 $$
 
